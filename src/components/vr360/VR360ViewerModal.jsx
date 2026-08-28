@@ -27,6 +27,26 @@ function FovController({ fov }) {
   return null;
 }
 
+// Camera Position & Direction Controller based on positionX, positionY, positionZ
+function CameraController({ positionX, positionY, positionZ, controlsRef }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    const posX = Number(positionX) ?? 0.1;
+    const posY = Number(positionY) ?? 0.1;
+    const posZ = Number(positionZ) ?? 0.1;
+
+    if (controlsRef?.current) {
+      controlsRef.current.target.set(posX, posY, posZ);
+      controlsRef.current.update();
+    } else if (camera) {
+      camera.lookAt(posX, posY, posZ);
+    }
+  }, [positionX, positionY, positionZ, camera, controlsRef]);
+
+  return null;
+}
+
 export default function VR360ViewerModal({
   scenes = [],
   activeScene = null,
@@ -161,6 +181,11 @@ export default function VR360ViewerModal({
           <span style={{ fontSize: '16px', fontWeight: '700', color: '#f8fafc' }}>
             {activeScene?.name || 'Trải Nghiệm VR 360°'}
           </span>
+          {activeScene && (
+            <span style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'monospace' }}>
+              Tọa độ ban đầu: X: {activeScene.positionX ?? 0.1}, Y: {activeScene.positionY ?? 0.1}, Z: {activeScene.positionZ ?? 0.1}
+            </span>
+          )}
         </div>
 
         {/* Action Controls */}
@@ -412,6 +437,12 @@ export default function VR360ViewerModal({
         style={{ width: '100%', height: '100%' }}
       >
         <FovController fov={fov} />
+        <CameraController
+          positionX={activeScene?.positionX}
+          positionY={activeScene?.positionY}
+          positionZ={activeScene?.positionZ}
+          controlsRef={controlsRef}
+        />
         {currentImageUrl ? (
           <Suspense
             fallback={
