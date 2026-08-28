@@ -1,0 +1,37 @@
+/* DashboardLayout.module.scss */
+
+$bg-light: #f8fafc;
+$text-main: #1e293b;
+
+.dashboardLayout {
+  min-height: 100vh;
+  width: 100%;
+  background-color: $bg-light;
+  color: $text-main;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bodyWrapper {
+  display: flex;
+  flex: 1;
+  position: relative;
+  min-height: calc(100vh - 64px);
+}
+
+.mainContainer {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .mainContainer {
+    padding: 1.5rem 1rem;
+  }
+}

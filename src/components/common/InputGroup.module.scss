@@ -1,0 +1,101 @@
+/* InputGroup.module.scss - White/Light Theme with #de913f Accent */
+
+$primary: #de913f;
+$input-bg: #f8fafc;
+$input-border: #cbd5e1;
+$text-main: #0f172a;
+$text-muted: #64748b;
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .iconLeft {
+      position: absolute;
+      left: 0.9rem;
+      color: $text-muted;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s ease;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    input {
+      width: 100%;
+      height: 46px;
+      background: $input-bg;
+      border: 1px solid $input-border;
+      border-radius: 12px;
+      padding: 0 1rem 0 2.75rem;
+      font-size: 0.9rem;
+      color: $text-main;
+      outline: none;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+
+      &:focus {
+        border-color: $primary;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(222, 145, 63, 0.2);
+
+        &~.iconLeft {
+          color: $primary;
+        }
+      }
+    }
+
+    .togglePasswordBtn {
+      position: absolute;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: $text-muted;
+      cursor: pointer;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $primary;
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .fieldError {
+    font-size: 0.775rem;
+    color: #ef4444;
+    margin-top: 0.15rem;
+  }
+}

@@ -1,0 +1,107 @@
+/* Sidebar.module.scss - Light Theme with #de913f Accent */
+
+$primary: #de913f;
+$primary-hover: #c47926;
+$primary-light: rgba(222, 145, 63, 0.12);
+$sidebar-bg: #ffffff;
+$card-border: #f1f5f9;
+$text-dark: #0f172a;
+$text-muted: #64748b;
+
+.sidebar {
+  width: 260px;
+  background: $sidebar-bg;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+
+  &.collapsed {
+    width: 72px;
+
+    .menuLabel,
+    .sectionTitle {
+      display: none;
+    }
+
+    .menuItem {
+      justify-content: center;
+      padding: 0.85rem;
+    }
+  }
+
+  .sidebarContent {
+    padding: 1.25rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.725rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    padding: 0 0.75rem;
+  }
+
+  .menuList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .menuItem {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    color: $text-muted;
+    font-size: 0.925rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+      color: $text-muted;
+    }
+
+    &:hover {
+      color: $primary;
+      background: rgba(222, 145, 63, 0.06);
+
+      svg {
+        color: $primary;
+        transform: scale(1.08);
+      }
+    }
+
+    &.active {
+      color: $primary;
+      background: $primary-light;
+      border-color: rgba(222, 145, 63, 0.25);
+      font-weight: 700;
+
+      svg {
+        color: $primary;
+      }
+    }
+  }
+}
