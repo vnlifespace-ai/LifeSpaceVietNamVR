@@ -2,18 +2,6 @@ import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { getVrScenesByProjectId, createVrScene } from '../../api/vrscene';
-
-// Helper to construct valid image URL from scene path (No fallback default images)
-function getImageUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-    return path;
-  }
-  const baseUrl = (import.meta.env.VITE_API_URL || 'https://lifespacevrbackend-production.up.railway.app').replace(/\/api\/?$/, '');
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl}${cleanPath}`;
-}
 
 // 360 Panorama Sphere Mesh
 function PanoramaMesh({ imageUrl }) {
@@ -40,14 +28,15 @@ function FovController({ fov }) {
 }
 
 export default function VR360ViewerModal({
+  scenes = [],
+  activeScene = null,
+  loadingScenes = false,
   idProject,
   projectName = 'Dự án VR',
-  initialSceneId,
+  onSelectScene,
+  onUploadScene,
   onClose,
 }) {
-  const [scenes, setScenes] = useState([]);
-  const [loadingScenes, setLoadingScenes] = useState(true);
-  const [activeScene, setActiveScene] = useState(null);
   const [autoRotate, setAutoRotate] = useState(false);
   const [fov, setFov] = useState(62);
   const containerRef = useRef(null);
@@ -61,40 +50,6 @@ export default function VR360ViewerModal({
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');
 
-  // Fetch all VR scenes for this project
-  const fetchScenes = async () => {
-    if (!idProject) return;
-    setLoadingScenes(true);
-    try {
-      const res = await getVrScenesByProjectId(idProject);
-      let list = [];
-      if (Array.isArray(res?.result)) {
-        list = res.result;
-      } else if (res?.result && typeof res.result === 'object') {
-        list = [res.result];
-      }
-
-      setScenes(list);
-      if (list.length > 0) {
-        // If an initialSceneId was provided, pick it, else default to first or keep current
-        const found = list.find((s) => s.id === initialSceneId);
-        setActiveScene(found || list[0]);
-      } else {
-        setActiveScene(null);
-      }
-    } catch (err) {
-      console.warn('VR360ViewerModal fetch error:', err);
-      setScenes([]);
-      setActiveScene(null);
-    } finally {
-      setLoadingScenes(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchScenes();
-  }, [idProject]);
-
   const handleZoomIn = () => setFov((prev) => Math.max(35, prev - 8));
   const handleZoomOut = () => setFov((prev) => Math.min(85, prev + 8));
 
@@ -106,8 +61,8 @@ export default function VR360ViewerModal({
     }
   };
 
-  // Direct VR Scene Upload Handler
-  const handleUploadScene = async (e) => {
+  // Direct VR Scene Upload Handler delegating to external handler
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!newSceneName.trim()) {
       setUploadError('Vui lòng nhập tên VR Scene!');
@@ -123,39 +78,30 @@ export default function VR360ViewerModal({
     setUploadSuccess('');
 
     try {
-      const res = await createVrScene({
-        name: newSceneName.trim(),
-        positionX: 0.1,
-        positionY: 0.1,
-        positionZ: 0.1,
-        idProject,
-        file: newSceneFile,
-      });
+      if (onUploadScene) {
+        await onUploadScene({
+          name: newSceneName.trim(),
+          file: newSceneFile,
+        });
+      }
 
       setUploadSuccess('Tải lên hình ảnh VR Scene 360° thành công!');
       setNewSceneName('');
       setNewSceneFile(null);
 
-      // Refresh scenes list and activate new scene
-      const createdItem = res?.result;
-      await fetchScenes();
-      if (createdItem) {
-        setActiveScene(createdItem);
-      }
-
       setTimeout(() => {
         setShowUploadModal(false);
         setUploadSuccess('');
-      }, 1000);
+      }, 800);
     } catch (err) {
-      console.error('Direct Upload Scene error:', err);
+      console.error('Upload Scene error:', err);
       setUploadError(err.message || 'Không thể tải lên ảnh 360°. Vui lòng thử lại!');
     } finally {
       setUploading(false);
     }
   };
 
-  const currentImageUrl = activeScene?.path ? getImageUrl(activeScene.path) : '';
+  const currentImageUrl = activeScene?.path || '';
 
   return (
     <div
@@ -253,7 +199,7 @@ export default function VR360ViewerModal({
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <span>+ Thêm Ảnh VR 360°</span>
+            <span>Thêm Ảnh VR 360°</span>
           </button>
 
           {/* Auto Rotate Button */}
@@ -360,37 +306,39 @@ export default function VR360ViewerModal({
           </div>
 
           {/* Close Modal Button */}
-          <button
-            onClick={onClose}
-            title="Đóng 3D Viewer"
-            style={{
-              background: '#ef4444',
-              border: 'none',
-              color: '#ffffff',
-              padding: '8px 14px',
-              borderRadius: '10px',
-              fontSize: '13px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)',
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Đóng 3D Viewer"
+              style={{
+                background: '#ef4444',
+                border: 'none',
+                color: '#ffffff',
+                padding: '8px 14px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)',
+              }}
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            <span>Đóng</span>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              <span>Đóng</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -519,12 +467,14 @@ export default function VR360ViewerModal({
 
           {scenes.map((s, idx) => {
             const isSelected = activeScene?.id === s.id;
-            const imgUrl = getImageUrl(s.path);
+            const imgUrl = s.path || '';
 
             return (
               <button
                 key={s.id || idx}
-                onClick={() => setActiveScene(s)}
+                onClick={() => {
+                  if (onSelectScene) onSelectScene(s);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -634,7 +584,7 @@ export default function VR360ViewerModal({
               </div>
             )}
 
-            <form onSubmit={handleUploadScene} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>
                   Tên VR Scene *

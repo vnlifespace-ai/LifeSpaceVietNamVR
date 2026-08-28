@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import ProjectTable from '../../components/Project';
+import ProjectTable from '../../components/Project/ProjectTable';
+import CreateProjectModal from '../../components/Project/CreateProjectModal';
+import AlertBox from '../../components/common/AlertBox';
+import { getProjects, createProject } from '../../api/project';
 import styles from '../dashboard/Dashboard.module.scss';
 
 export default function ProjectsPage() {
@@ -14,6 +17,69 @@ export default function ProjectsPage() {
       // Fallback
     }
   }
+
+  // --- STATE MANAGEMENT ---
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Alert feedback messages
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  // --- API HANDLERS ---
+  const fetchProjects = async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await getProjects();
+      let list = [];
+      if (Array.isArray(res?.result)) {
+        list = res.result;
+      } else if (res?.result && typeof res.result === 'object') {
+        list = [res.result];
+      }
+      setProjects(list);
+    } catch (err) {
+      console.warn('API getProjects Error:', err);
+      setErrorMsg(err.message || 'Không thể lấy danh sách dự án');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  // Handle Project Creation
+  const handleCreateProject = async ({ nameProject }) => {
+    setCreating(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const res = await createProject({ nameProject: nameProject.trim() });
+      const newProj = res?.result;
+
+      if (newProj) {
+        setProjects((prev) => [newProj, ...prev]);
+        setSuccessMsg(`Đã tạo dự án "${newProj.nameProject || nameProject.trim()}" thành công!`);
+      } else {
+        setSuccessMsg(`Tạo dự án "${nameProject.trim()}" thành công!`);
+        await fetchProjects();
+      }
+
+      setShowCreateModal(false);
+    } catch (err) {
+      console.error('API createProject error:', err);
+      setErrorMsg(err.message || 'Không thể tạo dự án. Vui lòng thử lại!');
+      throw err;
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <DashboardLayout user={user} activeMenu="projects">
@@ -38,8 +104,29 @@ export default function ProjectsPage() {
         </p>
       </div>
 
+      {/* Global Alert Messages */}
+      <AlertBox type="error" message={errorMsg} />
+      <AlertBox type="success" message={successMsg} />
+
       {/* Project Table Component */}
-      <ProjectTable />
+      <ProjectTable
+        projects={projects}
+        loading={loading}
+        onRefresh={fetchProjects}
+        onOpenCreateModal={() => {
+          setErrorMsg('');
+          setSuccessMsg('');
+          setShowCreateModal(true);
+        }}
+      />
+
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateProject}
+        creating={creating}
+      />
     </DashboardLayout>
   );
 }
