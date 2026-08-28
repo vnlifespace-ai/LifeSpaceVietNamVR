@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import styles from '../../pages/auth/Auth.module.scss';
+import styles from './AuthCard.module.scss';
 
 export default function AuthCard({
   icon,

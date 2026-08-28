@@ -1,8 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 import AuthCard from '../../components/auth/AuthCard';
 import LoginForm from '../../components/auth/LoginForm';
+import AlertBox from '../../components/common/AlertBox';
+import { loginUser } from '../../api/auth';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleLoginSubmit = async ({ email, password }) => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (!email?.trim() || !password) {
+      setErrorMsg('Vui lòng nhập đầy đủ Email và Mật khẩu.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginUser({
+        email: email.trim(),
+        password,
+      });
+
+      setSuccessMsg('Đăng nhập thành công! Đang chuyển đến Dashboard...');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
+    } catch (err) {
+      console.error('API loginUser Error:', err);
+      setErrorMsg(err.message || 'Đã có lỗi xảy ra khi đăng nhập!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthCard
       icon={
@@ -27,7 +63,10 @@ export default function Login() {
       footerLinkText="Đăng ký ngay"
       footerLinkTo="/register"
     >
-      <LoginForm />
+      <AlertBox type="error" message={errorMsg} />
+      <AlertBox type="success" message={successMsg} />
+
+      <LoginForm onSubmit={handleLoginSubmit} loading={loading} />
     </AuthCard>
   );
 }

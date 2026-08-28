@@ -1,8 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 import AuthCard from '../../components/auth/AuthCard';
 import RegisterForm from '../../components/auth/RegisterForm';
+import AlertBox from '../../components/common/AlertBox';
+import { registerUser } from '../../api/auth';
 
 export default function Register() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleRegisterSubmit = async ({ name, email, password, confirmPassword }) => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (!name?.trim() || !email?.trim() || !password) {
+      setErrorMsg('Vui lòng điền đầy đủ các thông tin bắt buộc.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMsg('Xác nhận mật khẩu không trùng khớp.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg('Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await registerUser({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
+
+      setSuccessMsg('Đăng ký thành công! Đang chuyển đến trang Đăng nhập...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1200);
+    } catch (err) {
+      console.error('API registerUser Error:', err);
+      setErrorMsg(err.message || 'Đã có lỗi xảy ra trong quá trình đăng ký!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthCard
       icon={
@@ -27,7 +74,10 @@ export default function Register() {
       footerLinkText="Đăng nhập"
       footerLinkTo="/login"
     >
-      <RegisterForm />
+      <AlertBox type="error" message={errorMsg} />
+      <AlertBox type="success" message={successMsg} />
+
+      <RegisterForm onSubmit={handleRegisterSubmit} loading={loading} />
     </AuthCard>
   );
 }
