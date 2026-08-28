@@ -13,6 +13,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ProjectsPage from "../pages/projects";
+import VrScenePage from "../pages/vrscene";
 import ProtectedRoute from "./ProtectedRoute";
 
 const router = [
@@ -49,6 +50,14 @@ const router = [
         element: (
             <ProtectedRoute>
                 <ProjectsPage />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/vrscene/:idProject',
+        element: (
+            <ProtectedRoute>
+                <VrScenePage />
             </ProtectedRoute>
         ),
     },

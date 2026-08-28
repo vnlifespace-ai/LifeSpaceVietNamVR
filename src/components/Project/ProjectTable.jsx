@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { getProjects, createProject } from '../../api/project';
 import AlertBox from '../common/AlertBox';
-import ProjectDetailModal from './ProjectDetailModal';
 import styles from './Project.module.scss';
 
 export default function ProjectTable() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -14,25 +15,6 @@ export default function ProjectTable() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState(null);
-
-  // Initial mock data to ensure table displays if backend has no projects yet or is offline
-  const initialMockProjects = [
-    {
-      id: 'proj-001',
-      nameProject: 'Hiyori Garden Tower',
-      slug: 'hiyori-garden-tower',
-    },
-    {
-      id: 'proj-002',
-      nameProject: 'Mia Resort & Villa',
-      slug: 'mia-resort-villa',
-    },
-    {
-      id: 'proj-003',
-      nameProject: 'LifeSpace Smart Penthouse',
-      slug: 'lifespace-smart-penthouse',
-    },
-  ];
 
   const fetchProjectList = async () => {
     setLoading(true);
@@ -46,17 +28,9 @@ export default function ProjectTable() {
         list = [res.result];
       }
 
-      if (list.length > 0) {
-        setProjects(list);
-      } else {
-        // Fallback to initial mock projects if API returns empty list
-        setProjects(initialMockProjects);
-      }
+      setProjects(list);
     } catch (err) {
-      console.warn('API getProjects Error, using initial list:', err);
-      if (projects.length === 0) {
-        setProjects(initialMockProjects);
-      }
+      console.warn('API getProjects Error:', err);
     } finally {
       setLoading(false);
     }
@@ -80,44 +54,18 @@ export default function ProjectTable() {
     try {
       const res = await createProject({ nameProject: nameProject.trim() });
       
-      let newProj = null;
-      if (res?.result?.id) {
-        newProj = res.result;
+      const newProj = res?.result;
+      if (newProj) {
+        setProjects((prev) => [newProj, ...prev]);
+        setSuccessMsg(`Đã tạo dự án "${newProj.nameProject || nameProject.trim()}" thành công!`);
       } else {
-        // Fallback construct if backend returns structure differently
-        const generatedSlug = nameProject
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        newProj = {
-          id: `proj-${Date.now().toString().slice(-4)}`,
-          nameProject: nameProject.trim(),
-          slug: generatedSlug || 'du-an-moi',
-        };
+        setSuccessMsg(`Tạo dự án thành công!`);
+        fetchProjectList();
       }
-
-      setProjects((prev) => [newProj, ...prev]);
-      setSuccessMsg(`Đã tạo dự án "${newProj.nameProject}" thành công!`);
       setNameProject('');
     } catch (err) {
-      console.warn('API createProject error, fallback adding to local state:', err);
-      // Create local item fallback so user experience is smooth
-      const generatedSlug = nameProject
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-
-      const fallbackProj = {
-        id: `proj-${Date.now().toString().slice(-4)}`,
-        nameProject: nameProject.trim(),
-        slug: generatedSlug || 'du-an-moi',
-      };
-
-      setProjects((prev) => [fallbackProj, ...prev]);
-      setSuccessMsg(`Đã tạo dự án "${fallbackProj.nameProject}" thành công!`);
-      setNameProject('');
+      console.error('API createProject error:', err);
+      setErrorMsg(err.message || 'Không thể tạo dự án. Vui lòng thử lại!');
     } finally {
       setCreating(false);
     }
@@ -325,8 +273,8 @@ export default function ProjectTable() {
                     <td>
                       <button
                         className={styles.detailBtn}
-                        onClick={() => setSelectedProject(item)}
-                        title="Xem chi tiết dự án"
+                        onClick={() => navigate(`/vrscene/${item.id}`, { state: { project: item } })}
+                        title="Xem danh sách VR Scene của dự án"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

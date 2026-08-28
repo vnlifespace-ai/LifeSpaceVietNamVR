@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://lifespacevrbackend-production.up.railway.app/api/').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://lifespacevr-backend.onrender.com/api').replace(/\/+$/, '');
 
 /**
  * Get current auth token from localStorage
