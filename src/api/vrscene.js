@@ -17,7 +17,7 @@ function getAuthHeaders() {
 
 /**
  * Create a new VR Scene (POST /vrscene/)
- * Accepts multipart form-data: 'data' (JSON blob or string) + 'file' (Panorama file)
+ * Accepts multipart form-data: name, positionX, positionY, positionZ, idProject, file
  * @param {Object} payload - { name, positionX, positionY, positionZ, idProject, file }
  */
 export async function createVrScene({ name, positionX = 0.1, positionY = 0.1, positionZ = 0.1, idProject, file }) {
@@ -28,18 +28,17 @@ export async function createVrScene({ name, positionX = 0.1, positionY = 0.1, po
 
     const formData = new FormData();
 
-    const dataObj = {
-      name,
-      positionX: parseFloat(positionX) || 0.1,
-      positionY: parseFloat(positionY) || 0.1,
-      positionZ: parseFloat(positionZ) || 0.1,
-      idProject,
-    };
+    const posX = isNaN(parseFloat(positionX)) ? 0.1 : parseFloat(positionX);
+    const posY = isNaN(parseFloat(positionY)) ? 0.1 : parseFloat(positionY);
+    const posZ = isNaN(parseFloat(positionZ)) ? 0.1 : parseFloat(positionZ);
 
-    // Append JSON string for 'data' parameter (Spring Boot expects String)
-    formData.append('data', JSON.stringify(dataObj));
-
-    // Append binary file
+    formData.append('name', name || '');
+    formData.append('positionX', posX);
+    formData.append('positionY', posY);
+    formData.append('positionZ', posZ);
+    if (idProject) {
+      formData.append('idProject', idProject);
+    }
     formData.append('file', file);
 
     const response = await fetch(`${API_BASE_URL}/vrscene/`, {
