@@ -4,9 +4,13 @@ import styles from './VrScene.module.scss';
 export default function VrSceneTable({
   scenes = [],
   loading = false,
+  defaultVRSceneId = null,
+  updatingDefaultId = null,
   onRefresh,
   onOpenCreateModal,
   onOpen3D,
+  onSetDefaultScene,
+  onDeleteScene,
 }) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -60,7 +64,7 @@ export default function VrSceneTable({
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }}
+                  className={loading ? styles.spinning : ''}
                 >
                   <polyline points="23 4 23 10 17 10" />
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
@@ -92,7 +96,7 @@ export default function VrSceneTable({
             {onOpen3D && (
               <button
                 className={styles.open3dBtn}
-                onClick={() => onOpen3D(scenes.length > 0 ? scenes[0].id : null)}
+                onClick={() => onOpen3D(defaultVRSceneId || (scenes.length > 0 ? scenes[0].id : null))}
                 title="Trải nghiệm không gian 3D VR 360°"
               >
                 <svg
@@ -120,20 +124,21 @@ export default function VrSceneTable({
                 <th>Hình Ảnh</th>
                 <th>Tên VR Scene (name)</th>
                 <th>Tọa độ (X, Y, Z)</th>
+                <th style={{ textAlign: 'center' }}>Ảnh Ban Đầu (VR360)</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
               {loading && filteredScenes.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className={styles.emptyState}>
+                  <td colSpan="7" className={styles.emptyState}>
                     <div className={styles.spinner} style={{ margin: '0 auto 0.5rem' }}></div>
                     <p>Đang tải danh sách VR Scene từ API...</p>
                   </td>
                 </tr>
               ) : filteredScenes.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className={styles.emptyState}>
+                  <td colSpan="7" className={styles.emptyState}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -202,25 +207,53 @@ export default function VrSceneTable({
                       </span>
                     </td>
                     <td>
-                      {onOpen3D && (
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => onOpen3D(item.id)}
-                          title="Xem VR 360°"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
+                      <div className={styles.switchCell}>
+                        {updatingDefaultId === item.id ? (
+                          <div className={styles.switchLoading} title="Đang cập nhật ảnh ban đầu...">
+                            <div className={styles.miniSpinner} />
+                          </div>
+                        ) : (
+                          <label className={styles.switch} title="Chọn làm hình ảnh ban đầu khi vào VR360">
+                            <input
+                              type="checkbox"
+                              checked={item.id === defaultVRSceneId}
+                              disabled={updatingDefaultId !== null}
+                              onChange={() => {
+                                if (onSetDefaultScene && item.id !== defaultVRSceneId) {
+                                  onSetDefaultScene(item);
+                                }
+                              }}
+                            />
+                            <span className={styles.slider}></span>
+                          </label>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+
+
+                        {onDeleteScene && (
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => onDeleteScene(item)}
+                            title="Xóa VR Scene"
                           >
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                          <span>Xem VR 360°</span>
-                        </button>
-                      )}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              <line x1="10" y1="11" x2="10" y2="17" />
+                              <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

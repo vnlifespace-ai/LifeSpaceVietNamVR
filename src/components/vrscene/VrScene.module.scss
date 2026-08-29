@@ -320,6 +320,11 @@ $text-muted: #64748b;
       svg {
         width: 15px;
         height: 15px;
+        transition: transform 0.2s ease;
+
+        &.spinning {
+          animation: spin 0.8s linear infinite;
+        }
       }
     }
 
@@ -518,13 +523,12 @@ $text-muted: #64748b;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   background: $bg-white;
   border: 1px solid $primary;
   color: $primary;
-  font-size: 0.825rem;
-  font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -536,9 +540,123 @@ $text-muted: #64748b;
   }
 
   svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
+}
+
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: $bg-white;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.switchCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.switchLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 24px;
+
+  .miniSpinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(222, 145, 63, 0.25);
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: $primary;
+    }
+
+    &:focus + .slider {
+      box-shadow: 0 0 0 2px rgba(222, 145, 63, 0.2);
+    }
+
+    &:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    &:disabled + .slider {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #cbd5e1;
+    transition: 0.25s ease;
+    border-radius: 24px;
+
+    &:before {
+      position: absolute;
+      content: '';
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s ease;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.defaultBadge {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: $primary-hover;
+  background: $primary-light;
+  border: 1px solid $primary-border;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
 }
 
 .emptyState {

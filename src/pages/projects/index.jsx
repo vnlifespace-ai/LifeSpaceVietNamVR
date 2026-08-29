@@ -3,7 +3,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import ProjectTable from '../../components/Project/ProjectTable';
 import CreateProjectModal from '../../components/Project/CreateProjectModal';
 import AlertBox from '../../components/common/AlertBox';
-import { getProjects, createProject } from '../../api/project';
+import { getProjects, createProject, deleteProject } from '../../api/project';
 import styles from '../dashboard/Dashboard.module.scss';
 
 export default function ProjectsPage() {
@@ -81,6 +81,24 @@ export default function ProjectsPage() {
     }
   };
 
+  // Handle Project Deletion
+  const handleDeleteProject = async (project) => {
+    if (!project?.id) return;
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa dự án "${project.nameProject || project.id}"?`);
+    if (!confirmDelete) return;
+
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await deleteProject(project.id);
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+      setSuccessMsg(`Đã xóa dự án "${project.nameProject || project.id}" thành công!`);
+    } catch (err) {
+      console.error('API deleteProject error:', err);
+      setErrorMsg(err.message || 'Không thể xóa dự án. Vui lòng thử lại!');
+    }
+  };
+
   return (
     <DashboardLayout user={user} activeMenu="projects">
       {/* Page Header */}
@@ -118,6 +136,7 @@ export default function ProjectsPage() {
           setSuccessMsg('');
           setShowCreateModal(true);
         }}
+        onDeleteProject={handleDeleteProject}
       />
 
       {/* Create Project Modal */}

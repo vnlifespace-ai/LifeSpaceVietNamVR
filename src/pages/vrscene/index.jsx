@@ -5,8 +5,8 @@ import VrSceneTable from '../../components/vrscene/VrSceneTable';
 import CreateVrSceneModal from '../../components/vrscene/CreateVrSceneModal';
 import VR360ViewerModal from '../../components/vr360';
 import AlertBox from '../../components/common/AlertBox';
-import { createVrScene } from '../../api/vrscene';
-import { getVRScenesByProjectId } from '../../api/project';
+import { createVrScene, deleteVrScene, updateVrScene } from '../../api/vrscene';
+import { getVRScenesByProjectId, getProjectById, setDefaultVrScene } from '../../api/project';
 import dashboardStyles from '../dashboard/Dashboard.module.scss';
 
 export default function VrScenePage() {
@@ -34,6 +34,10 @@ export default function VrScenePage() {
   const [creating, setCreating] = useState(false);
   const [selectedSceneId, setSelectedSceneId] = useState(null);
 
+  // Default VR Scene for the project
+  const [defaultVRSceneId, setDefaultVRSceneId] = useState(projectFromState?.idVRScene || null);
+  const [updatingDefaultId, setUpdatingDefaultId] = useState(null);
+
   // Dialog / Modal Visibility States
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [show3DModal, setShow3DModal] = useState(false);
@@ -43,6 +47,18 @@ export default function VrScenePage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   // --- API HANDLERS ---
+  const fetchProjectInfo = async () => {
+    if (!idProject) return;
+    try {
+      const res = await getProjectById(idProject);
+      if (res?.result?.idVRScene) {
+        setDefaultVRSceneId(res.result.idVRScene);
+      }
+    } catch (err) {
+      console.warn('API getProjectById Error:', err);
+    }
+  };
+
   const fetchScenes = async () => {
     if (!idProject) return;
     setLoading(true);
@@ -66,7 +82,82 @@ export default function VrScenePage() {
 
   useEffect(() => {
     fetchScenes();
+    fetchProjectInfo();
   }, [idProject]);
+
+  // Handle setting default initial VR scene for project (PATCH /projects/id/{idProject})
+  const handleSetDefaultScene = async (scene) => {
+    if (!idProject || !scene?.id) return;
+    setUpdatingDefaultId(scene.id);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      await setDefaultVrScene(idProject, scene.id);
+      setDefaultVRSceneId(scene.id);
+      setSuccessMsg(`Đã đặt "${scene.name || scene.id}" làm hình ảnh VR360 ban đầu của dự án!`);
+    } catch (err) {
+      console.error('API setDefaultVrScene error:', err);
+      setErrorMsg(err.message || 'Không thể cập nhật ảnh ban đầu của dự án.');
+    } finally {
+      setUpdatingDefaultId(null);
+    }
+  };
+
+  // Handle VR Scene Deletion (DELETE /vrscene/{id})
+  const handleDeleteScene = async (scene) => {
+    if (!scene?.id) return;
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa VR Scene "${scene.name || scene.id}"?`);
+    if (!confirmDelete) return;
+
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      await deleteVrScene(scene.id);
+      setScenes((prev) => prev.filter((s) => s.id !== scene.id));
+      setSuccessMsg(`Đã xóa VR Scene "${scene.name || scene.id}" thành công!`);
+    } catch (err) {
+      console.error('API deleteVrScene Error:', err);
+      setErrorMsg(err.message || 'Không thể xóa VR Scene. Vui lòng thử lại!');
+    }
+  };
+
+  // Handle VR Scene Update (PUT /vrscene/{id})
+  const handleUpdateScene = async ({ id, name, positionX, positionY, positionZ, idProject: projId }) => {
+    if (!id) return;
+    try {
+      const res = await updateVrScene(id, {
+        name,
+        positionX,
+        positionY,
+        positionZ,
+        idProject: projId || idProject,
+      });
+
+      const resResult = res?.result || {};
+      setScenes((prev) =>
+        prev.map((s) => {
+          if (s.id === id) {
+            return {
+              ...s,
+              ...resResult,
+              name: resResult.name || name || s.name,
+              positionX: resResult.positionX ?? positionX ?? s.positionX,
+              positionY: resResult.positionY ?? positionY ?? s.positionY,
+              positionZ: resResult.positionZ ?? positionZ ?? s.positionZ,
+              path: resResult.path || s.path, // Keep original 360 image URL path
+            };
+          }
+          return s;
+        })
+      );
+      return resResult;
+    } catch (err) {
+      console.error('API updateVrScene Error:', err);
+      throw err;
+    }
+  };
 
   // Handle VR Scene Creation
   const handleCreateScene = async ({ name, positionX, positionY, positionZ, file }) => {
@@ -104,9 +195,10 @@ export default function VrScenePage() {
     }
   };
 
-  // Open 3D Viewer for a specific scene
+  // Open 3D Viewer for a specific scene (prioritizes project default scene idVRScene)
   const handleOpen3D = (sceneId) => {
-    setSelectedSceneId(sceneId || (scenes.length > 0 ? scenes[0].id : null));
+    const targetId = sceneId || defaultVRSceneId || (scenes.length > 0 ? scenes[0].id : null);
+    setSelectedSceneId(targetId);
     setShow3DModal(true);
   };
 
@@ -114,7 +206,11 @@ export default function VrScenePage() {
     setShow3DModal(false);
   };
 
-  const activeScene = scenes.find((s) => s.id === selectedSceneId) || scenes[0] || null;
+  const activeScene =
+    scenes.find((s) => s.id === selectedSceneId) ||
+    scenes.find((s) => s.id === defaultVRSceneId) ||
+    scenes[0] ||
+    null;
 
   return (
     <DashboardLayout user={user} activeMenu="projects">
@@ -182,13 +278,20 @@ export default function VrScenePage() {
       <VrSceneTable
         scenes={scenes}
         loading={loading}
-        onRefresh={fetchScenes}
+        defaultVRSceneId={defaultVRSceneId}
+        updatingDefaultId={updatingDefaultId}
+        onRefresh={() => {
+          fetchScenes();
+          fetchProjectInfo();
+        }}
         onOpenCreateModal={() => {
           setErrorMsg('');
           setSuccessMsg('');
           setShowCreateModal(true);
         }}
         onOpen3D={handleOpen3D}
+        onSetDefaultScene={handleSetDefaultScene}
+        onDeleteScene={handleDeleteScene}
       />
 
       {/* CREATE VR SCENE MODAL COMPONENT */}
@@ -208,6 +311,7 @@ export default function VrScenePage() {
           idProject={idProject}
           projectName={projectName}
           onSelectScene={(scene) => setSelectedSceneId(scene?.id)}
+          onUpdateScene={handleUpdateScene}
           onUploadScene={async ({ name, file }) => {
             await handleCreateScene({
               name,

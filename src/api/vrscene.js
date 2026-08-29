@@ -66,3 +66,84 @@ export async function createVrScene({ name, positionX = 0.1, positionY = 0.1, po
     throw error;
   }
 }
+
+/**
+ * Update an existing VR Scene details without file (PUT /vrscene/{id})
+ * @param {string} id 
+ * @param {Object} payload - { name, positionX, positionY, positionZ, idProject }
+ */
+export async function updateVrScene(id, { name, positionX, positionY, positionZ, idProject }) {
+  try {
+    if (!id) {
+      throw new Error('Mã VR Scene (id) không hợp lệ');
+    }
+
+    const payloadObj = {
+      name,
+      positionX: parseFloat(positionX) ?? 0.1,
+      positionY: parseFloat(positionY) ?? 0.1,
+      positionZ: parseFloat(positionZ) ?? 0.1,
+      idProject,
+    };
+
+    const response = await fetch(`${API_BASE_URL}/vrscene/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payloadObj),
+    });
+
+    const resData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        resData?.message || `Không thể cập nhật VR Scene (${response.status})`
+      );
+    }
+
+    if (resData && resData.code !== undefined && resData.code >= 400) {
+      throw new Error(resData.message || 'Cập nhật VR Scene thất bại');
+    }
+
+    return resData;
+  } catch (error) {
+    console.error('updateVrScene API Error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a VR Scene by ID (DELETE /vrscene/{id})
+ * @param {string} id 
+ */
+export async function deleteVrScene(id) {
+  try {
+    if (!id) {
+      throw new Error('Mã VR Scene (id) không hợp lệ');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/vrscene/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    const resData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        resData?.message || `Không thể xóa VR Scene (${response.status})`
+      );
+    }
+
+    if (resData && resData.code !== undefined && resData.code >= 400) {
+      throw new Error(resData.message || 'Xóa VR Scene thất bại');
+    }
+
+    return resData;
+  } catch (error) {
+    console.error('deleteVrScene API Error:', error);
+    throw error;
+  }
+}
