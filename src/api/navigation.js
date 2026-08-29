@@ -1,6 +1,6 @@
 import { getAuthToken } from './auth';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://lifespacevr-backend.onrender.com/api').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL).replace(/\/+$/, '');
 
 /**
  * Get auth headers for API requests
