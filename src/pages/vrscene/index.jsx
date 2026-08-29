@@ -3,9 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import VrSceneTable from '../../components/vrscene/VrSceneTable';
 import CreateVrSceneModal from '../../components/vrscene/CreateVrSceneModal';
-import VR360ViewerModal from '../../components/vr360';
 import AlertBox from '../../components/common/AlertBox';
-import { createVrScene, deleteVrScene, updateVrScene } from '../../api/vrscene';
+import { createVrScene, deleteVrScene } from '../../api/vrscene';
 import { getVRScenesByProjectId, getProjectById, setDefaultVrScene } from '../../api/project';
 import dashboardStyles from '../dashboard/Dashboard.module.scss';
 
@@ -38,9 +37,8 @@ export default function VrScenePage() {
   const [defaultVRSceneId, setDefaultVRSceneId] = useState(projectFromState?.idVRScene || null);
   const [updatingDefaultId, setUpdatingDefaultId] = useState(null);
 
-  // Dialog / Modal Visibility States
+  // Dialog / Modal Visibility State for Create Modal
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [show3DModal, setShow3DModal] = useState(false);
 
   // Alert Feedback Messages
   const [errorMsg, setErrorMsg] = useState('');
@@ -195,15 +193,14 @@ export default function VrScenePage() {
     }
   };
 
-  // Open 3D Viewer for a specific scene (prioritizes project default scene idVRScene)
+  // Navigate to dedicated full-screen VR 360 Editor Page
   const handleOpen3D = (sceneId) => {
     const targetId = sceneId || defaultVRSceneId || (scenes.length > 0 ? scenes[0].id : null);
-    setSelectedSceneId(targetId);
-    setShow3DModal(true);
-  };
-
-  const handleClose3D = () => {
-    setShow3DModal(false);
+    if (targetId) {
+      navigate(`/vrscene/edit/${idProject}?sceneId=${targetId}`);
+    } else {
+      navigate(`/vrscene/edit/${idProject}`);
+    }
   };
 
   const activeScene =
@@ -301,20 +298,6 @@ export default function VrScenePage() {
         onSubmit={handleCreateScene}
         creating={creating}
       />
-
-      {/* 3D VR VIEWER MODAL PRESENTATIONAL COMPONENT */}
-      {show3DModal && (
-        <VR360ViewerModal
-          scenes={scenes}
-          activeScene={activeScene}
-          loadingScenes={loading}
-          idProject={idProject}
-          projectName={projectName}
-          onSelectScene={(scene) => setSelectedSceneId(scene?.id)}
-          onUpdateScene={handleUpdateScene}
-          onClose={handleClose3D}
-        />
-      )}
     </DashboardLayout>
   );
 }

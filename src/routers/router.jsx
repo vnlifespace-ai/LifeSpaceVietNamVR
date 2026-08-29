@@ -1,5 +1,3 @@
-import Can1APage from "../pages/hiyori/can1a/page";
-import Can1BPage from "../pages/hiyori/can1b/page";
 import Can2APage from "../pages/hiyori/can2a/page";
 import Can2BPage from "../pages/hiyori/can2b/page";
 import Can3APage from "../pages/hiyori/can3a/page";
@@ -14,6 +12,7 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ProjectsPage from "../pages/projects";
 import VrScenePage from "../pages/vrscene";
+import VrSceneEditPage from "../pages/vrscene/edit";
 import PublicViewPage from "../pages/view";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -67,17 +66,16 @@ const router = [
         ),
     },
     {
+        path: '/vrscene/edit/:idProject',
+        element: (
+            <ProtectedRoute>
+                <VrSceneEditPage />
+            </ProtectedRoute>
+        ),
+    },
+    {
         path: '/hiyori',
         children: [
-            {
-                path: 'can1a',
-                element: <Can1APage />,
-                index: true
-            },
-            {
-                path: 'can1b',
-                element: <Can1BPage />
-            },
             {
                 path: 'can2a',
                 element: <Can2APage />
