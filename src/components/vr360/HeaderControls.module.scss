@@ -1,0 +1,225 @@
+@use './variables' as *;
+
+.headerControls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.titleBadge {
+  color: #fff;
+  background: rgba(15, 23, 42, 0.85);
+  padding: 10px 20px;
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .projectLabel {
+    font-size: 11px;
+    color: $primary;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .sceneName {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+
+  .coordsInfo {
+    font-size: 11px;
+    color: #94a3b8;
+    font-family: monospace;
+  }
+}
+
+.actionControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.actionBtn {
+  height: 38px;
+  background: linear-gradient(135deg, $primary, $primary-hover);
+  border: none;
+  color: #ffffff;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(222, 145, 63, 0.35);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(222, 145, 63, 0.5);
+  }
+
+  &.activeActionBtn {
+    background: linear-gradient(135deg, $primary-hover, $primary);
+    box-shadow: 0 0 20px rgba(222, 145, 63, 0.8);
+    border: 1px solid #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.saveBtn {
+  height: 38px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(222, 145, 63, 0.5);
+  color: $primary;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  .kbdBadge {
+    font-size: 10px;
+    font-family: inherit;
+    background: rgba(222, 145, 63, 0.15);
+    color: $primary;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(222, 145, 63, 0.3);
+    margin-left: 2px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(222, 145, 63, 0.15);
+    border-color: $primary;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.autoRotateBtn {
+  height: 38px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, $primary, $primary-hover);
+    border-color: transparent;
+    color: #ffffff;
+    font-weight: 700;
+  }
+}
+
+.toolsGroup {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  padding: 0 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+
+  .toolBtn {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    width: 32px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 2px;
+  }
+}
+
+.closeBtn {
+  height: 38px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+  }
+}

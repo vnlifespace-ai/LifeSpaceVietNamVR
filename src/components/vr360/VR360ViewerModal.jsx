@@ -1,88 +1,18 @@
-import React, { Suspense, useState, useRef, useEffect } from 'react';
-import { Canvas, useLoader, useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from './VR360ViewerModal.module.scss';
 
-// 360 Panorama Sphere Mesh (optimized with texture filtering and 48x32 geometry)
-function PanoramaMesh({ imageUrl }) {
-  const texture = useLoader(THREE.TextureLoader, imageUrl);
+// Sub-components
+import HeaderControls from './HeaderControls';
+import BottomSceneSelector from './BottomSceneSelector';
+import ThreeCanvasScene from './ThreeCanvasScene';
+import ActionAdjusterToolbar from './ActionAdjusterToolbar';
 
-  useEffect(() => {
-    if (texture) {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.generateMipmaps = false;
-      texture.minFilter = THREE.LinearFilter;
-    }
-  }, [texture]);
-
-  return (
-    <mesh scale={[-1, 1, 1]}>
-      <sphereGeometry args={[500, 48, 32]} />
-      <meshBasicMaterial map={texture} side={THREE.BackSide} />
-    </mesh>
-  );
-}
-
-// Camera FOV controller for Zoom in / Zoom out
-function FovController({ fov }) {
-  const { camera } = useThree();
-  useEffect(() => {
-    if (camera) {
-      camera.fov = fov;
-      camera.updateProjectionMatrix();
-    }
-  }, [fov, camera]);
-  return null;
-}
-
-// Camera Position & Direction Controller based on positionX, positionY, positionZ
-function CameraController({ positionX, positionY, positionZ, controlsRef }) {
-  const { camera } = useThree();
-
-  useEffect(() => {
-    const posX = Number(positionX) ?? 0.1;
-    const posY = Number(positionY) ?? 0.1;
-    const posZ = Number(positionZ) ?? 0.1;
-
-    if (controlsRef?.current) {
-      controlsRef.current.target.set(posX, posY, posZ);
-      controlsRef.current.update();
-    } else if (camera) {
-      camera.lookAt(posX, posY, posZ);
-    }
-  }, [positionX, positionY, positionZ, camera, controlsRef]);
-
-  return null;
-}
-
-// Live Camera Direction Vector Tracker (updates DOM directly for 60fps+ GPU butter-smooth performance without React re-renders)
-function CameraTracker({ coordsSpanRef, currentCoordsRef }) {
-  const { camera } = useThree();
-  const dirVec = useRef(new THREE.Vector3());
-
-  useFrame(() => {
-    if (camera) {
-      camera.getWorldDirection(dirVec.current);
-      const x = parseFloat(Number(dirVec.current.x).toFixed(2)) || 0.1;
-      const y = parseFloat(Number(dirVec.current.y).toFixed(2)) || 0.1;
-      const z = parseFloat(Number(dirVec.current.z).toFixed(2)) || 0.1;
-
-      if (
-        currentCoordsRef.current.x !== x ||
-        currentCoordsRef.current.y !== y ||
-        currentCoordsRef.current.z !== z
-      ) {
-        currentCoordsRef.current = { x, y, z };
-        if (coordsSpanRef.current) {
-          coordsSpanRef.current.innerText = `Tọa độ hiện tại: X: ${x}, Y: ${y}, Z: ${z}`;
-        }
-      }
-    }
-  });
-
-  return null;
-}
+// API
+import {
+  getNavigationsBySourceScene,
+  createNavigations,
+  deleteNavigation,
+} from '../../api/navigation';
 
 export default function VR360ViewerModal({
   scenes = [],
@@ -91,7 +21,6 @@ export default function VR360ViewerModal({
   idProject,
   projectName = 'Dự án VR',
   onSelectScene,
-  onUploadScene,
   onUpdateScene,
   onClose,
 }) {
@@ -103,17 +32,17 @@ export default function VR360ViewerModal({
 
   // Live coordinates ref (avoids React state re-render loop on every mouse move frame)
   const currentCoordsRef = useRef({
-    x: parseFloat(Number(activeScene?.positionX ?? 0.1).toFixed(2)),
-    y: parseFloat(Number(activeScene?.positionY ?? 0.1).toFixed(2)),
-    z: parseFloat(Number(activeScene?.positionZ ?? 0.1).toFixed(2)),
+    x: parseFloat(Number(activeScene?.positionX ?? 0.1).toFixed(4)),
+    y: parseFloat(Number(activeScene?.positionY ?? 0.1).toFixed(4)),
+    z: parseFloat(Number(activeScene?.positionZ ?? 0.1).toFixed(4)),
   });
 
   useEffect(() => {
     if (activeScene) {
       const initCoords = {
-        x: parseFloat(Number(activeScene.positionX ?? 0.1).toFixed(2)),
-        y: parseFloat(Number(activeScene.positionY ?? 0.1).toFixed(2)),
-        z: parseFloat(Number(activeScene.positionZ ?? 0.1).toFixed(2)),
+        x: parseFloat(Number(activeScene.positionX ?? 0.1).toFixed(4)),
+        y: parseFloat(Number(activeScene.positionY ?? 0.1).toFixed(4)),
+        z: parseFloat(Number(activeScene.positionZ ?? 0.1).toFixed(4)),
       };
       currentCoordsRef.current = initCoords;
       if (coordsSpanRef.current) {
@@ -126,13 +55,41 @@ export default function VR360ViewerModal({
   const [savingCoords, setSavingCoords] = useState(false);
   const [toastMsg, setToastMsg] = useState({ type: '', text: '' });
 
-  // Upload new scene modal states
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [newSceneName, setNewSceneName] = useState('');
-  const [newSceneFile, setNewSceneFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const [uploadSuccess, setUploadSuccess] = useState('');
+  // Navigation Actions Hotspots States
+  const [navigations, setNavigations] = useState([]);
+  const [pendingNavigations, setPendingNavigations] = useState([]);
+  const [isPlacingAction, setIsPlacingAction] = useState(false);
+
+  // Active Hotspot Fine-Tune Selection State
+  const [selectedNavToAdjust, setSelectedNavToAdjust] = useState(null);
+
+  // Fetch Navigation Actions whenever activeScene changes
+  useEffect(() => {
+    if (activeScene?.id) {
+      fetchNavigations(activeScene.id);
+    } else {
+      setNavigations([]);
+      setPendingNavigations([]);
+    }
+    setIsPlacingAction(false);
+    setSelectedNavToAdjust(null);
+  }, [activeScene?.id]);
+
+  const fetchNavigations = async (sourceSceneId) => {
+    try {
+      const res = await getNavigationsBySourceScene(sourceSceneId);
+      let list = [];
+      if (Array.isArray(res?.result)) {
+        list = res.result;
+      } else if (res?.result && typeof res.result === 'object') {
+        list = [res.result];
+      }
+      setNavigations(list);
+      setPendingNavigations([]);
+    } catch (err) {
+      console.warn('Fetch navigations error:', err);
+    }
+  };
 
   const handleZoomIn = () => setFov((prev) => Math.max(35, prev - 8));
   const handleZoomOut = () => setFov((prev) => Math.min(85, prev + 8));
@@ -145,7 +102,7 @@ export default function VR360ViewerModal({
     }
   };
 
-  // Save camera target coordinates (positionX, positionY, positionZ)
+  // Save camera target coordinates & pending navigation action hotspots (Ctrl + S)
   const handleSaveCameraCoordinates = async () => {
     if (!activeScene?.id) {
       setToastMsg({ type: 'error', text: 'Chưa chọn VR Scene để lưu tọa độ!' });
@@ -158,9 +115,10 @@ export default function VR360ViewerModal({
     const posZ = currentCoordsRef.current.z;
 
     setSavingCoords(true);
-    setToastMsg({ type: 'info', text: 'Đang lưu tọa độ mới...' });
+    setToastMsg({ type: 'info', text: 'Đang lưu tọa độ & các điểm Action Navigation...' });
 
     try {
+      // 1. Save Scene Camera Position
       const payload = {
         id: activeScene.id,
         name: activeScene.name || 'VR Scene',
@@ -179,20 +137,147 @@ export default function VR360ViewerModal({
       activeScene.positionY = posY;
       activeScene.positionZ = posZ;
 
+      // 2. Save pending Navigation Action Hotspots via POST /navigation
+      if (pendingNavigations.length > 0) {
+        const cleanPayload = pendingNavigations.map((nav) => ({
+          name: nav.name,
+          icon: nav.icon || 'arrow',
+          positionX: Number(nav.positionX),
+          positionY: Number(nav.positionY),
+          positionZ: Number(nav.positionZ),
+          idSourceScene: nav.idSourceScene || activeScene.id,
+          idTargetScene: nav.idTargetScene,
+        }));
+
+        const resNav = await createNavigations(cleanPayload);
+        const savedNavs = Array.isArray(resNav?.result) ? resNav.result : [];
+
+        setNavigations((prev) => [
+          ...prev.filter((n) => !n.isPending),
+          ...(savedNavs.length > 0
+            ? savedNavs
+            : pendingNavigations.map((n) => ({ ...n, isPending: false }))),
+        ]);
+        setPendingNavigations([]);
+      }
+
       setToastMsg({
         type: 'success',
-        text: `Đã lưu tọa độ góc nhìn thành công! (X: ${posX}, Y: ${posY}, Z: ${posZ})`,
+        text: `Đã lưu thành công góc nhìn & các Action Navigation! (Ctrl+S)`,
       });
       setTimeout(() => setToastMsg({ type: '', text: '' }), 3500);
     } catch (err) {
-      console.error('Save camera coords error:', err);
+      console.error('Save camera coords & navigations error:', err);
       setToastMsg({
         type: 'error',
-        text: err.message || 'Không thể lưu tọa độ. Vui lòng thử lại!',
+        text: err.message || 'Không thể lưu dữ liệu. Vui lòng thử lại!',
       });
       setTimeout(() => setToastMsg({ type: '', text: '' }), 4000);
     } finally {
       setSavingCoords(false);
+    }
+  };
+
+  // Toggle "+ Tạo Action" Placement Mode Handler
+  const handleTogglePlacingAction = () => {
+    if (!activeScene?.id) {
+      setToastMsg({ type: 'error', text: 'Vui lòng chọn VR Scene để tạo Action!' });
+      setTimeout(() => setToastMsg({ type: '', text: '' }), 3000);
+      return;
+    }
+
+    const nextState = !isPlacingAction;
+    setIsPlacingAction(nextState);
+
+    if (nextState) {
+      setSelectedNavToAdjust(null);
+    }
+  };
+
+  // Click / Right-Click Handler on 360 Panorama Sphere:
+  // Creates the Action Hotspot immediately with a unique _tempId and opens ActionAdjusterToolbar!
+  const handleSphereClick = ({ x, y, z }) => {
+    if (!activeScene?.id) return;
+
+    const otherScenes = scenes.filter((s) => s.id !== activeScene.id);
+    const defaultTarget = otherScenes.length > 0 ? otherScenes[0] : scenes[0];
+    const defaultTargetId = defaultTarget?.id || '';
+    const defaultTargetName = defaultTarget ? `Chuyển đến ${defaultTarget.name}` : 'Action Navigation';
+
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+    const newNav = {
+      _tempId: tempId,
+      name: defaultTargetName,
+      icon: 'arrow',
+      positionX: x,
+      positionY: y,
+      positionZ: z,
+      idSourceScene: activeScene.id,
+      idTargetScene: defaultTargetId,
+      isPending: true,
+    };
+
+    setNavigations((prev) => [...prev, newNav]);
+    setPendingNavigations((prev) => [...prev, newNav]);
+    setSelectedNavToAdjust(newNav);
+    setIsPlacingAction(false);
+
+    setToastMsg({
+      type: 'success',
+      text: 'Đã tạo điểm Action! Kéo các thanh X, Y, Z ở bảng góc dưới để chỉnh vị trí, sau đó nhấn Ctrl + S để lưu.',
+    });
+    setTimeout(() => setToastMsg({ type: '', text: '' }), 4000);
+  };
+
+  // Live update handler for selected Action Hotspot (matches by _tempId or id)
+  const handleUpdateNav = (updatedNav) => {
+    const isSameNav = (n) => {
+      if (updatedNav._tempId && n._tempId) return n._tempId === updatedNav._tempId;
+      if (updatedNav.id && n.id) return n.id === updatedNav.id;
+      return n === updatedNav;
+    };
+
+    setNavigations((prev) => prev.map((n) => (isSameNav(n) ? updatedNav : n)));
+
+    setPendingNavigations((prev) => {
+      const exists = prev.some(isSameNav);
+      if (exists) {
+        return prev.map((n) => (isSameNav(n) ? updatedNav : n));
+      }
+      return [...prev, updatedNav];
+    });
+
+    setSelectedNavToAdjust(updatedNav);
+  };
+
+  // Delete a Navigation Action Hotspot
+  const handleDeleteNavigation = async (nav) => {
+    if (!nav) return;
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa điểm Action "${nav.name}"?`);
+    if (!confirmDelete) return;
+
+    const isSameNav = (n) => {
+      if (nav._tempId && n._tempId) return n._tempId === nav._tempId;
+      if (nav.id && n.id) return n.id === nav.id;
+      return n === nav;
+    };
+
+    try {
+      if (nav.id && !nav.isPending) {
+        await deleteNavigation(nav.id);
+      }
+      setNavigations((prev) => prev.filter((n) => !isSameNav(n)));
+      setPendingNavigations((prev) => prev.filter((n) => !isSameNav(n)));
+      if (selectedNavToAdjust && isSameNav(selectedNavToAdjust)) {
+        setSelectedNavToAdjust(null);
+      }
+      setToastMsg({ type: 'success', text: `Đã xóa Action Navigation "${nav.name}"!` });
+      setTimeout(() => setToastMsg({ type: '', text: '' }), 3000);
+    } catch (err) {
+      console.error('Delete navigation error:', err);
+      setToastMsg({ type: 'error', text: err.message || 'Không thể xóa Navigation Action' });
+      setTimeout(() => setToastMsg({ type: '', text: '' }), 3500);
     }
   };
 
@@ -209,180 +294,59 @@ export default function VR360ViewerModal({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeScene, idProject]);
-
-  // Direct VR Scene Upload Handler delegating to external handler
-  const handleUploadSubmit = async (e) => {
-    e.preventDefault();
-    if (!newSceneName.trim()) {
-      setUploadError('Vui lòng nhập tên VR Scene!');
-      return;
-    }
-    if (!newSceneFile) {
-      setUploadError('Vui lòng chọn tệp hình ảnh 360°!');
-      return;
-    }
-
-    setUploading(true);
-    setUploadError('');
-    setUploadSuccess('');
-
-    try {
-      if (onUploadScene) {
-        await onUploadScene({
-          name: newSceneName.trim(),
-          file: newSceneFile,
-        });
-      }
-
-      setUploadSuccess('Tải lên hình ảnh VR Scene 360° thành công!');
-      setNewSceneName('');
-      setNewSceneFile(null);
-
-      setTimeout(() => {
-        setShowUploadModal(false);
-        setUploadSuccess('');
-      }, 800);
-    } catch (err) {
-      console.error('Upload Scene error:', err);
-      setUploadError(err.message || 'Không thể tải lên ảnh 360°. Vui lòng thử lại!');
-    } finally {
-      setUploading(false);
-    }
-  };
+  }, [activeScene, idProject, pendingNavigations]);
 
   const currentImageUrl = activeScene?.path || '';
 
   return (
     <div ref={containerRef} className={styles.viewerContainer}>
-      {/* Top Header Controls */}
-      <div className={styles.headerControls}>
-        {/* Title Badge */}
-        <div className={styles.titleBadge}>
-          <span className={styles.projectLabel}>{projectName}</span>
-          <span className={styles.sceneName}>{activeScene?.name || 'Trải Nghiệm VR 360°'}</span>
-          {activeScene && (
-            <span ref={coordsSpanRef} className={styles.coordsInfo}>
-              Tọa độ hiện tại: X: {currentCoordsRef.current.x}, Y: {currentCoordsRef.current.y}, Z:{' '}
-              {currentCoordsRef.current.z}
-            </span>
-          )}
-        </div>
+      {/* Top Header Controls Toolbar */}
+      <HeaderControls
+        projectName={projectName}
+        activeScene={activeScene}
+        coordsSpanRef={coordsSpanRef}
+        currentCoordsRef={currentCoordsRef}
+        savingCoords={savingCoords}
+        autoRotate={autoRotate}
+        isPlacingAction={isPlacingAction}
+        onOpenActionModal={handleTogglePlacingAction}
+        onSaveCoords={handleSaveCameraCoordinates}
+        onToggleAutoRotate={() => setAutoRotate(!autoRotate)}
+        onToggleFullscreen={toggleFullscreen}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onClose={onClose}
+      />
 
-        {/* Action Controls */}
-        <div className={styles.actionControls}>
-          {/* Save Camera View Angle Coordinates Button (Ctrl + S) */}
+      {/* Placement Mode Active Top Hint Banner */}
+      {isPlacingAction && (
+        <div className={styles.placementHintBanner}>
+          <span>Nhấp chuột phải (hoặc nhấp chuột trái) vào vị trí bất kỳ trên ảnh VR 360° để đặt điểm Action Navigation</span>
           <button
-            onClick={handleSaveCameraCoordinates}
-            disabled={savingCoords || !activeScene}
-            title="Lưu tọa độ góc nhìn khung hình hiện tại (Phím tắt: Ctrl + S)"
-            className={styles.saveBtn}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-              <polyline points="17 21 17 13 7 13 7 21" />
-              <polyline points="7 3 7 8 15 8" />
-            </svg>
-            <span>{savingCoords ? 'Đang lưu...' : 'Lưu góc nhìn (Ctrl+S)'}</span>
-          </button>
-
-          {/* Add 360 Image Direct Button */}
-          <button
-            onClick={() => {
-              setUploadError('');
-              setUploadSuccess('');
-              setShowUploadModal(true);
+            onClick={() => setIsPlacingAction(false)}
+            title="Thoát chế độ chấm điểm"
+            style={{
+              background: 'rgba(255,255,255,0.25)',
+              border: 'none',
+              color: '#ffffff',
+              borderRadius: '50%',
+              width: '22px',
+              height: '22px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-            title="Thêm ảnh VR 360° trực tiếp"
-            className={styles.uploadBtn}
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>Thêm Ảnh VR 360°</span>
-          </button>
-
-          {/* Auto Rotate Button */}
-          <button
-            onClick={() => setAutoRotate(!autoRotate)}
-            title="Tự động xoay 360"
-            className={`${styles.autoRotateBtn} ${autoRotate ? styles.active : ''}`}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{autoRotate ? 'Dừng xoay' : 'Tự xoay'}</span>
-          </button>
-
-          {/* Fullscreen Button */}
-          <button
-            onClick={toggleFullscreen}
-            title="Toàn màn hình"
-            className={styles.iconBtn}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-
-          {/* Zoom Buttons */}
-          <div className={styles.zoomGroup}>
-            <button onClick={handleZoomIn} title="Phóng to (+)" className={styles.zoomBtn}>
-              +
-            </button>
-            <button onClick={handleZoomOut} title="Thu nhỏ (-)" className={styles.zoomBtn}>
-              -
-            </button>
-          </div>
-
-          {/* Close Modal Button */}
-          {onClose && (
-            <button onClick={onClose} title="Đóng 3D Viewer" className={styles.closeBtn}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-              <span>Đóng</span>
-            </button>
-          )}
         </div>
-      </div>
+      )}
 
       {/* Toast Floating Alert Message */}
       {toastMsg.text && (
@@ -421,184 +385,48 @@ export default function VR360ViewerModal({
           </svg>
           <h3>Chưa Có Hình Ảnh VR 360°</h3>
           <p>
-            Dự án này chưa có tệp ảnh panorama 360° nào. Vui lòng tải lên ảnh 360° mới để bắt đầu trải nghiệm!
+            Dự án này chưa có tệp ảnh panorama 360° nào. Vui lòng kiểm tra dữ liệu VR Scene!
           </p>
-
-          <button
-            onClick={() => {
-              setUploadError('');
-              setUploadSuccess('');
-              setShowUploadModal(true);
-            }}
-            className={styles.uploadBtn}
-            style={{ marginTop: '0.5rem', padding: '0.75rem 1.5rem' }}
-          >
-            + Tải Lên Ảnh 360° Đầu Tiên
-          </button>
         </div>
       )}
 
       {/* 3D Canvas Scene */}
-      <Canvas
-        camera={{ position: [0, 0, 0.1], fov }}
-        gl={{ powerPreference: 'high-performance', antialias: true }}
-        dpr={[1, 2]}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <FovController fov={fov} />
-        <CameraController
-          positionX={activeScene?.positionX}
-          positionY={activeScene?.positionY}
-          positionZ={activeScene?.positionZ}
-          controlsRef={controlsRef}
+      <ThreeCanvasScene
+        currentImageUrl={currentImageUrl}
+        fov={fov}
+        activeScene={activeScene}
+        controlsRef={controlsRef}
+        coordsSpanRef={coordsSpanRef}
+        currentCoordsRef={currentCoordsRef}
+        autoRotate={autoRotate}
+        navigations={navigations}
+        scenes={scenes}
+        selectedNavId={selectedNavToAdjust?._tempId || selectedNavToAdjust?.id || selectedNavToAdjust}
+        onSelectScene={onSelectScene}
+        onDeleteNavigation={handleDeleteNavigation}
+        onSelectNavToAdjust={(nav) => setSelectedNavToAdjust(nav)}
+        isPlacingAction={isPlacingAction}
+        onSphereClick={handleSphereClick}
+      />
+
+      {/* Direct Fine-Tune Action Position & Scene Adjustment Toolbar */}
+      {selectedNavToAdjust && (
+        <ActionAdjusterToolbar
+          nav={selectedNavToAdjust}
+          scenes={scenes}
+          activeScene={activeScene}
+          onUpdateNav={handleUpdateNav}
+          onClose={() => setSelectedNavToAdjust(null)}
+          onDeleteNav={handleDeleteNavigation}
         />
-        <CameraTracker coordsSpanRef={coordsSpanRef} currentCoordsRef={currentCoordsRef} />
-        {currentImageUrl ? (
-          <Suspense
-            fallback={
-              <mesh>
-                <sphereGeometry args={[500, 32, 16]} />
-                <meshBasicMaterial color="#0f172a" side={THREE.BackSide} />
-              </mesh>
-            }
-          >
-            <PanoramaMesh key={currentImageUrl} imageUrl={currentImageUrl} />
-          </Suspense>
-        ) : (
-          <mesh>
-            <sphereGeometry args={[500, 32, 16]} />
-            <meshBasicMaterial color="#0a0c10" side={THREE.BackSide} />
-          </mesh>
-        )}
-        <OrbitControls
-          ref={controlsRef}
-          enableZoom={false}
-          enablePan={false}
-          rotateSpeed={-0.5}
-          autoRotate={autoRotate}
-          autoRotateSpeed={0.8}
-        />
-      </Canvas>
+      )}
 
       {/* Bottom VR Scenes Selector Toolbar */}
-      {scenes.length > 0 && (
-        <div className={styles.bottomToolbar}>
-          <span className={styles.toolbarLabel}>Danh Sách Scene ({scenes.length}):</span>
-
-          {scenes.map((s, idx) => {
-            const isSelected = activeScene?.id === s.id;
-            const imgUrl = s.path || '';
-
-            return (
-              <button
-                key={s.id || idx}
-                onClick={() => {
-                  if (onSelectScene) onSelectScene(s);
-                }}
-                className={`${styles.sceneChip} ${isSelected ? styles.active : ''}`}
-              >
-                {imgUrl ? (
-                  <img
-                    src={imgUrl}
-                    alt={s.name}
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '6px',
-                      objectFit: 'cover',
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '6px',
-                      background: 'rgba(255, 255, 255, 0.2)',
-                    }}
-                  />
-                )}
-                <span>{s.name || `Scene ${idx + 1}`}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* DIRECT 360 IMAGE UPLOAD POPUP MODAL */}
-      {showUploadModal && (
-        <div className={styles.uploadModalOverlay} onClick={() => setShowUploadModal(false)}>
-          <div className={styles.uploadModalBox} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>
-                <span style={{ color: '#de913f' }}>+</span> Thêm Ảnh VR Scene 360°
-              </h3>
-              <button className={styles.modalCloseBtn} onClick={() => setShowUploadModal(false)}>
-                ✕
-              </button>
-            </div>
-
-            {uploadError && <div className={styles.alertError}>{uploadError}</div>}
-            {uploadSuccess && <div className={styles.alertSuccess}>{uploadSuccess}</div>}
-
-            <form onSubmit={handleUploadSubmit} className={styles.uploadForm}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tên VR Scene *</label>
-                <input
-                  type="text"
-                  placeholder="vd: Phòng Khách Panorama"
-                  value={newSceneName}
-                  onChange={(e) => setNewSceneName(e.target.value)}
-                  required
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Tệp hình ảnh 360° (file) *</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setNewSceneFile(e.target.files[0]);
-                    }
-                  }}
-                  required
-                  className={styles.formInput}
-                  style={{ background: '#f8fafc', padding: '0.6rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  style={{
-                    padding: '0.65rem 1.25rem',
-                    background: '#f1f5f9',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    color: '#475569',
-                    fontWeight: '600',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Hủy
-                </button>
-
-                <button type="submit" disabled={uploading} className={styles.submitBtn}>
-                  {uploading ? 'Đang tải lên...' : 'Tải Lên 360°'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <BottomSceneSelector
+        scenes={scenes}
+        activeScene={activeScene}
+        onSelectScene={onSelectScene}
+      />
     </div>
   );
 }

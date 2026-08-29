@@ -312,15 +312,6 @@ export default function VrScenePage() {
           projectName={projectName}
           onSelectScene={(scene) => setSelectedSceneId(scene?.id)}
           onUpdateScene={handleUpdateScene}
-          onUploadScene={async ({ name, file }) => {
-            await handleCreateScene({
-              name,
-              file,
-              positionX: 0.1,
-              positionY: 0.1,
-              positionZ: 0.1,
-            });
-          }}
           onClose={handleClose3D}
         />
       )}

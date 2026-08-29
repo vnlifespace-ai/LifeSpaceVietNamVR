@@ -1,0 +1,205 @@
+@use './variables' as *;
+
+.adjusterPanel {
+  position: absolute;
+  bottom: 95px;
+  right: 20px;
+  z-index: 80;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid $primary;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  color: #ffffff;
+  pointer-events: auto;
+  animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  .title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .closeBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.sliderItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  .labelRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #cbd5e1;
+
+    .val {
+      font-family: monospace;
+      color: $primary;
+    }
+  }
+
+  .rangeInput {
+    width: 100%;
+    accent-color: $primary;
+    cursor: pointer;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .selectInput,
+  .textInput {
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(30, 41, 59, 0.9);
+    color: #ffffff;
+    font-size: 0.8rem;
+    outline: none;
+
+    &:focus {
+      border-color: $primary;
+    }
+
+    option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+  }
+}
+
+.keypadRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.6);
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  .keypadLabel {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  .keypadBtns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .stepBtn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+
+    &:hover {
+      background: $primary;
+      border-color: $primary;
+    }
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .deleteBtn {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 0.45rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+  }
+
+  .doneBtn {
+    background: linear-gradient(135deg, $primary, $primary-hover);
+    color: #ffffff;
+    border: none;
+    padding: 0.45rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(222, 145, 63, 0.4);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(222, 145, 63, 0.6);
+    }
+  }
+}

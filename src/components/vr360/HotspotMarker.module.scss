@@ -1,0 +1,117 @@
+@use './variables' as *;
+
+/* 3D Hotspot Navigation Marker Styles */
+.hotspotContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+
+  &.selectedHotspot {
+    .hotspotIcon {
+      border-color: #f59e0b;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.9);
+      transform: scale(1.2);
+    }
+  }
+}
+
+.iconWrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotspotPulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  margin-left: -22px;
+  border-radius: 50%;
+  background: rgba(222, 145, 63, 0.4);
+  border: 2px solid $primary;
+  animation: pulseAnimation 2s infinite ease-out;
+  pointer-events: none;
+}
+
+.hotspotIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary, $primary-hover);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+
+  &:hover {
+    transform: scale(1.15);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 8px 25px rgba(222, 145, 63, 0.8);
+  }
+}
+
+.hotspotTooltip {
+  margin-top: 6px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+  transition: all 0.2s ease;
+
+  .targetBadge {
+    background: rgba(222, 145, 63, 0.25);
+    color: $primary;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+}
+
+.hotspotDeleteBtn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.2);
+    background: #dc2626;
+  }
+}

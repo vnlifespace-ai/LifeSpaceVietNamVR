@@ -1,7 +1,4 @@
-$primary: #de913f;
-$primary-hover: #c47926;
-$dark-bg: #0a0c10;
-$card-bg: rgba(15, 23, 42, 0.85);
+@use './variables' as *;
 
 .viewerContainer {
   position: fixed;
@@ -14,196 +11,9 @@ $card-bg: rgba(15, 23, 42, 0.85);
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-.headerControls {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
-  z-index: 20;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  pointer-events: none;
-}
-
-.titleBadge {
-  color: #fff;
-  background-color: $card-bg;
-  padding: 10px 20px;
-  border-radius: 14px;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  .projectLabel {
-    font-size: 11px;
-    color: $primary;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-  }
-
-  .sceneName {
-    font-size: 16px;
-    font-weight: 700;
-    color: #f8fafc;
-  }
-
-  .coordsInfo {
-    font-size: 11px;
-    color: #94a3b8;
-    font-family: monospace;
-  }
-}
-
-.actionControls {
-  display: flex;
-  gap: 10px;
-  pointer-events: auto;
-}
-
-.saveBtn {
-  background: $card-bg;
-  border: 1px solid $primary;
-  color: $primary;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-
-  &:hover:not(:disabled) {
-    background: $primary;
-    color: #ffffff;
-  }
-
-  &:disabled {
-    background: rgba(222, 145, 63, 0.5);
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-}
-
-.uploadBtn {
-  background: linear-gradient(135deg, $primary, $primary-hover);
-  border: none;
-  color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 14px rgba(222, 145, 63, 0.4);
-  transition: all 0.2s ease;
-
-  &:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
-}
-
-.autoRotateBtn {
-  background: $card-bg;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-
-  &.active {
-    background: linear-gradient(135deg, $primary, $primary-hover);
-    border-color: transparent;
-  }
-}
-
-.iconBtn {
-  background: $card-bg;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-}
-
-.zoomGroup {
-  display: flex;
-  background-color: $card-bg;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-
-  .zoomBtn {
-    background: none;
-    border: none;
-    color: #fff;
-    padding: 6px 12px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s ease;
-
-    &:first-child {
-      border-right: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-  }
-}
-
-.closeBtn {
-  background: #ef4444;
-  border: none;
-  color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #dc2626;
-  }
-}
-
 .toastAlert {
   position: absolute;
-  top: 80px;
+  top: 135px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 90;
@@ -264,198 +74,54 @@ $card-bg: rgba(15, 23, 42, 0.85);
   }
 }
 
-.bottomToolbar {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background-color: rgba(15, 23, 42, 0.88);
-  padding: 10px 16px;
-  border-radius: 16px;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  max-width: 90vw;
-  overflow-x: auto;
-
-  .toolbarLabel {
-    font-size: 12px;
-    color: $primary;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-}
-
-.sceneChip {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #94a3b8;
-  padding: 6px 14px;
+.uploadBtn {
+  background: linear-gradient(135deg, $primary, $primary-hover);
+  border: none;
+  color: #ffffff;
+  padding: 8px 14px;
   border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(222, 145, 63, 0.4);
   transition: all 0.2s ease;
-  white-space: nowrap;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-  }
-
-  &.active {
-    background: linear-gradient(135deg, $primary, $primary-hover);
-    border-color: transparent;
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(222, 145, 63, 0.4);
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
 }
 
-.uploadModalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10000;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
+.placementHintBanner {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 85;
+  background: rgba(222, 145, 63, 0.92);
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(222, 145, 63, 0.5);
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: pulseBanner 2s infinite ease-in-out;
 }
 
-.uploadModalBox {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 460px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  color: #0f172a;
-
-  .modalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .modalTitle {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .modalCloseBtn {
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      color: #64748b;
-      cursor: pointer;
-    }
+@keyframes pulseBanner {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
   }
-
-  .alertError {
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    background: #fef2f2;
-    color: #dc2626;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border: 1px solid #fecaca;
-  }
-
-  .alertSuccess {
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    background: #f0fdf4;
-    color: #16a34a;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border: 1px solid #bbf7d0;
-  }
-
-  .uploadForm {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .formLabel {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .formInput {
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border 0.2s ease;
-
-    &:focus {
-      border-color: $primary;
-    }
-  }
-
-  .fileDropArea {
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    cursor: pointer;
-    background: #f8fafc;
-    transition: all 0.2s ease;
-
-    &:hover {
-      border-color: $primary;
-      background: #fffbeb;
-    }
-  }
-
-  .submitBtn {
-    padding: 0.85rem 1.5rem;
-    background: linear-gradient(135deg, $primary, $primary-hover);
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(222, 145, 63, 0.4);
-    transition: all 0.2s ease;
-    margin-top: 0.5rem;
-
-    &:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(222, 145, 63, 0.5);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  50% {
+    transform: translateX(-50%) scale(1.02);
   }
 }
+
