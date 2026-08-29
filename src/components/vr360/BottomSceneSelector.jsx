@@ -6,7 +6,6 @@ export default function BottomSceneSelector({ scenes = [], activeScene = null, o
 
   return (
     <div className={styles.bottomToolbar}>
-      <span className={styles.toolbarLabel}>Danh Sách Scene ({scenes.length}):</span>
 
       {scenes.map((s, idx) => {
         const isSelected = activeScene?.id === s.id;

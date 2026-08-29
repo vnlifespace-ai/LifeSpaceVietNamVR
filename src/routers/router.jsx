@@ -14,6 +14,7 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ProjectsPage from "../pages/projects";
 import VrScenePage from "../pages/vrscene";
+import PublicViewPage from "../pages/view";
 import ProtectedRoute from "./ProtectedRoute";
 
 const router = [
@@ -36,6 +37,10 @@ const router = [
     {
         path: '/auth/register',
         element: <Register />,
+    },
+    {
+        path: '/view/:slug',
+        element: <PublicViewPage />,
     },
     {
         path: '/dashboard',

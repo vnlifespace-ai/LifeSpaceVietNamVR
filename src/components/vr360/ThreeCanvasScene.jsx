@@ -6,7 +6,7 @@ import HotspotMarker from './HotspotMarker';
 import ActionPopover from './ActionPopover';
 
 // 360 Panorama Sphere Mesh (optimized with texture filtering and 48x32 geometry)
-function PanoramaMesh({ imageUrl, onSphereClick, isPlacingAction }) {
+function PanoramaMesh({ imageUrl, onSphereClick, isPlacingAction, isReadOnly }) {
   const texture = useLoader(THREE.TextureLoader, imageUrl);
   const { camera } = useThree();
 
@@ -25,7 +25,7 @@ function PanoramaMesh({ imageUrl, onSphereClick, isPlacingAction }) {
       e.nativeEvent.preventDefault();
     }
 
-    if (onSphereClick && e.point) {
+    if (!isReadOnly && onSphereClick && e.point) {
       // Calculate sub-pixel accurate direction vector from camera origin to intersected sphere surface
       const clickPoint = e.point.clone();
       const dir = clickPoint.sub(camera.position).normalize();
@@ -132,6 +132,7 @@ export default function ThreeCanvasScene({
   navigations = [],
   scenes = [],
   selectedNavId = null,
+  isReadOnly = false,
   onSelectScene,
   onDeleteNavigation,
   onSelectNavToAdjust,
@@ -171,6 +172,7 @@ export default function ThreeCanvasScene({
             imageUrl={currentImageUrl}
             onSphereClick={onSphereClick}
             isPlacingAction={isPlacingAction}
+            isReadOnly={isReadOnly}
           />
         </Suspense>
       ) : (
@@ -198,6 +200,7 @@ export default function ThreeCanvasScene({
             nav={nav}
             scenes={scenes}
             isSelected={isSelected}
+            isReadOnly={isReadOnly}
             onSelectScene={onSelectScene}
             onDeleteNavigation={onDeleteNavigation}
             onSelectNavToAdjust={onSelectNavToAdjust}

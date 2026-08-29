@@ -20,6 +20,7 @@ export default function VR360ViewerModal({
   loadingScenes = false,
   idProject,
   projectName = 'Dự án VR',
+  isReadOnly = false,
   onSelectScene,
   onUpdateScene,
   onClose,
@@ -309,6 +310,7 @@ export default function VR360ViewerModal({
         savingCoords={savingCoords}
         autoRotate={autoRotate}
         isPlacingAction={isPlacingAction}
+        isReadOnly={isReadOnly}
         onOpenActionModal={handleTogglePlacingAction}
         onSaveCoords={handleSaveCameraCoordinates}
         onToggleAutoRotate={() => setAutoRotate(!autoRotate)}
@@ -319,7 +321,7 @@ export default function VR360ViewerModal({
       />
 
       {/* Placement Mode Active Top Hint Banner */}
-      {isPlacingAction && (
+      {isPlacingAction && !isReadOnly && (
         <div className={styles.placementHintBanner}>
           <span>Nhấp chuột phải (hoặc nhấp chuột trái) vào vị trí bất kỳ trên ảnh VR 360° để đặt điểm Action Navigation</span>
           <button
@@ -403,14 +405,15 @@ export default function VR360ViewerModal({
         scenes={scenes}
         selectedNavId={selectedNavToAdjust?._tempId || selectedNavToAdjust?.id || selectedNavToAdjust}
         onSelectScene={onSelectScene}
-        onDeleteNavigation={handleDeleteNavigation}
-        onSelectNavToAdjust={(nav) => setSelectedNavToAdjust(nav)}
+        onDeleteNavigation={isReadOnly ? null : handleDeleteNavigation}
+        onSelectNavToAdjust={isReadOnly ? null : (nav) => setSelectedNavToAdjust(nav)}
         isPlacingAction={isPlacingAction}
+        isReadOnly={isReadOnly}
         onSphereClick={handleSphereClick}
       />
 
       {/* Direct Fine-Tune Action Position & Scene Adjustment Toolbar */}
-      {selectedNavToAdjust && (
+      {selectedNavToAdjust && !isReadOnly && (
         <ActionAdjusterToolbar
           nav={selectedNavToAdjust}
           scenes={scenes}

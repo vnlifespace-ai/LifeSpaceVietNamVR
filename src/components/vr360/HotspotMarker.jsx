@@ -7,6 +7,7 @@ export default function HotspotMarker({
   nav,
   scenes = [],
   isSelected = false,
+  isReadOnly = false,
   onSelectScene,
   onDeleteNavigation,
   onSelectNavToAdjust,
@@ -65,21 +66,23 @@ export default function HotspotMarker({
                 <polyline points="5 12 12 5 19 12" />
               </svg>
             </div>
-            <button
-              className={styles.hotspotDeleteBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onDeleteNavigation) {
-                  onDeleteNavigation(nav);
-                }
-              }}
-              title="Xóa Action Navigation"
-            >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            {!isReadOnly && (
+              <button
+                className={styles.hotspotDeleteBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onDeleteNavigation) {
+                    onDeleteNavigation(nav);
+                  }
+                }}
+                title="Xóa Action Navigation"
+              >
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
           </div>
 
           <div className={styles.hotspotTooltip}>

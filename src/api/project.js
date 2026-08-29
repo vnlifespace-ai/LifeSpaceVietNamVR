@@ -210,3 +210,45 @@ export async function getVRScenesByProjectId(idProject) {
     throw error;
   }
 }
+
+/**
+ * Fetch project details by slug (GET /projects/slug/{slug} with fallback GET /projects/id/{slug})
+ * @param {string} slug 
+ */
+export async function getProjectBySlug(slug) {
+  try {
+    if (!slug) {
+      throw new Error('Slug hoặc ID dự án không hợp lệ');
+    }
+
+    let response = await fetch(`${API_BASE_URL}/projects/slug/${encodeURIComponent(slug)}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    let resData = await response.json().catch(() => null);
+
+    if (!response.ok || (resData && resData.code >= 400)) {
+      // Fallback: try GET /projects/id/{slug}
+      const fallbackResponse = await fetch(`${API_BASE_URL}/projects/id/${encodeURIComponent(slug)}`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      const fallbackData = await fallbackResponse.json().catch(() => null);
+      if (fallbackResponse.ok && fallbackData && (fallbackData.result || fallbackData.code === 200 || !fallbackData.code)) {
+        return fallbackData;
+      }
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        resData?.message || `Không thể lấy thông tin dự án qua slug (${response.status})`
+      );
+    }
+
+    return resData;
+  } catch (error) {
+    console.error('getProjectBySlug API Error:', error);
+    throw error;
+  }
+}

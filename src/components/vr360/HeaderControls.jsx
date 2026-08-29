@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './HeaderControls.module.scss';
+import logoImg from '../../assets/image.png';
 
 export default function HeaderControls({
   projectName = 'Dự án VR',
@@ -9,6 +10,7 @@ export default function HeaderControls({
   savingCoords = false,
   autoRotate = false,
   isPlacingAction = false,
+  isReadOnly = false,
   onOpenActionModal,
   onSaveCoords,
   onToggleAutoRotate,
@@ -19,11 +21,16 @@ export default function HeaderControls({
 }) {
   return (
     <div className={styles.headerControls}>
-      {/* Title Badge */}
+      {/* Title Badge with Brand Logo */}
       <div className={styles.titleBadge}>
-        <span className={styles.projectLabel}>{projectName}</span>
-        <span className={styles.sceneName}>{activeScene?.name || 'Trải Nghiệm VR 360°'}</span>
-        {activeScene && (
+        <div className={styles.brandRow}>
+          <img src={logoImg} alt="LifeSpace Logo" className={styles.brandLogo} />
+          <div className={styles.titleTextGroup}>
+            <span className={styles.projectLabel}>{projectName}</span>
+            <span className={styles.sceneName}>{activeScene?.name || 'Trải Nghiệm VR 360°'}</span>
+          </div>
+        </div>
+        {activeScene && !isReadOnly && (
           <span ref={coordsSpanRef} className={styles.coordsInfo}>
             Tọa độ hiện tại: X: {currentCoordsRef?.current?.x ?? 0.1}, Y:{' '}
             {currentCoordsRef?.current?.y ?? 0.1}, Z: {currentCoordsRef?.current?.z ?? 0.1}
@@ -33,36 +40,40 @@ export default function HeaderControls({
 
       {/* Action Controls Toolbar */}
       <div className={styles.actionControls}>
-        {/* Create Action Hotspot Button */}
-        <button
-          onClick={onOpenActionModal}
-          disabled={!activeScene}
-          title="Tạo Action Navigation chuyển scene"
-          className={`${styles.actionBtn} ${isPlacingAction ? styles.activeActionBtn : ''}`}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-          </svg>
-          <span>{isPlacingAction ? 'Đang chấm điểm 360°' : 'Tạo Action'}</span>
-        </button>
+        {/* Create Action Hotspot Button (Hidden in read-only mode) */}
+        {!isReadOnly && (
+          <button
+            onClick={onOpenActionModal}
+            disabled={!activeScene}
+            title="Tạo Action Navigation chuyển scene"
+            className={`${styles.actionBtn} ${isPlacingAction ? styles.activeActionBtn : ''}`}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            <span>{isPlacingAction ? 'Đang chấm điểm 360°' : 'Tạo Action'}</span>
+          </button>
+        )}
 
-        {/* Save Camera View Angle Coordinates (Ctrl + S) */}
-        <button
-          onClick={onSaveCoords}
-          disabled={savingCoords || !activeScene}
-          title="Lưu tọa độ góc nhìn & các Action Navigation (Ctrl + S)"
-          className={styles.saveBtn}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          <span>{savingCoords ? 'Đang lưu...' : 'Lưu góc nhìn'}</span>
-          <kbd className={styles.kbdBadge}>Ctrl+S</kbd>
-        </button>
+        {/* Save Camera View Angle Coordinates (Ctrl + S) (Hidden in read-only mode) */}
+        {!isReadOnly && (
+          <button
+            onClick={onSaveCoords}
+            disabled={savingCoords || !activeScene}
+            title="Lưu tọa độ góc nhìn & các Action Navigation (Ctrl + S)"
+            className={styles.saveBtn}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>{savingCoords ? 'Đang lưu...' : 'Lưu góc nhìn'}</span>
+            <kbd className={styles.kbdBadge}>Ctrl+S</kbd>
+          </button>
+        )}
 
         {/* Auto Rotate Button */}
         <button
@@ -97,8 +108,8 @@ export default function HeaderControls({
           </button>
         </div>
 
-        {/* Close Button */}
-        {onClose && (
+        {/* Close Button (Hidden in read-only public view mode) */}
+        {onClose && !isReadOnly && (
           <button onClick={onClose} title="Đóng 3D Viewer" className={styles.closeBtn}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="18" y1="6" x2="6" y2="18" />
