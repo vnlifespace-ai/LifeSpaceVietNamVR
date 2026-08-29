@@ -82,6 +82,9 @@ export async function createProject({ nameProject }) {
  */
 export async function getProjectById(idProject) {
   try {
+    if (!idProject) {
+      throw new Error('Mã dự án (idProject) không hợp lệ');
+    }
     const response = await fetch(`${API_BASE_URL}/projects/id/${encodeURIComponent(idProject)}`, {
       method: 'GET',
       headers: getHeaders(),
@@ -102,6 +105,39 @@ export async function getProjectById(idProject) {
     return resData;
   } catch (error) {
     console.error('getProjectById API Error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch list of scenes by project ID (GET /projects/id/{idProject}/vrscene)
+ * @param {string} idProject 
+ */
+export async function getVRScenesByProjectId(idProject) {
+  try {
+    if (!idProject) {
+      throw new Error('Mã dự án (idProject) không hợp lệ');
+    }
+    const response = await fetch(`${API_BASE_URL}/projects/id/${encodeURIComponent(idProject)}/vrscene`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    const resData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        resData?.message || `Không thể lấy danh sách VR Scene (${response.status})`
+      );
+    }
+
+    if (resData && resData.code !== undefined && resData.code >= 400) {
+      throw new Error(resData.message || 'Lấy danh sách VR Scene thất bại');
+    }
+
+    return resData;
+  } catch (error) {
+    console.error('getScenesByProjectId API Error:', error);
     throw error;
   }
 }

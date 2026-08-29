@@ -14,38 +14,6 @@ function getAuthHeaders() {
   return headers;
 }
 
-/**
- * Fetch list of VR Scenes by project ID (GET /vrscene/idProject/{idProject})
- * @param {string} idProject 
- */
-export async function getVrScenesByProjectId(idProject) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/vrscene/idProject/${encodeURIComponent(idProject)}`, {
-      method: 'GET',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const resData = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      throw new Error(
-        resData?.message || `Không thể lấy danh sách VR Scene (${response.status})`
-      );
-    }
-
-    if (resData && resData.code !== undefined && resData.code >= 400) {
-      throw new Error(resData.message || 'Lấy danh sách VR Scene thất bại');
-    }
-
-    return resData;
-  } catch (error) {
-    console.error('getVrScenesByProjectId API Error:', error);
-    throw error;
-  }
-}
 
 /**
  * Create a new VR Scene (POST /vrscene/)

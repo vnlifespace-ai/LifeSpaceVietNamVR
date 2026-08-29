@@ -5,7 +5,8 @@ import VrSceneTable from '../../components/vrscene/VrSceneTable';
 import CreateVrSceneModal from '../../components/vrscene/CreateVrSceneModal';
 import VR360ViewerModal from '../../components/vr360';
 import AlertBox from '../../components/common/AlertBox';
-import { getVrScenesByProjectId, createVrScene } from '../../api/vrscene';
+import { createVrScene } from '../../api/vrscene';
+import { getVRScenesByProjectId } from '../../api/project';
 import dashboardStyles from '../dashboard/Dashboard.module.scss';
 
 export default function VrScenePage() {
@@ -47,7 +48,7 @@ export default function VrScenePage() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const res = await getVrScenesByProjectId(idProject);
+      const res = await getVRScenesByProjectId(idProject);
       let list = [];
       if (Array.isArray(res?.result)) {
         list = res.result;
@@ -56,7 +57,7 @@ export default function VrScenePage() {
       }
       setScenes(list);
     } catch (err) {
-      console.warn('API getVrScenesByProjectId Error:', err);
+      console.warn('API getVRScenesByProjectId Error:', err);
       setErrorMsg(err.message || 'Không thể lấy danh sách VR Scene');
     } finally {
       setLoading(false);
