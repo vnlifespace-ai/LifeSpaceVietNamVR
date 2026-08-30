@@ -1,51 +1,67 @@
-import Can2APage from "../pages/hiyori/can2a/page";
-import Can2BPage from "../pages/hiyori/can2b/page";
-import Can3APage from "../pages/hiyori/can3a/page";
-import Can3BPage from "../pages/hiyori/can3b/page";
-import CanAPage from "../pages/mia/cana";
-import CanBPage from "../pages/mia/canb";
-import CanCPage from "../pages/mia/canc";
-import CanDPage from "../pages/mia/cand";
-import CanEPage from "../pages/mia/cane";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import Dashboard from "../pages/dashboard/Dashboard";
-import ProjectsPage from "../pages/projects";
-import VrScenePage from "../pages/vrscene";
-import VrSceneEditPage from "../pages/vrscene/edit";
-import PublicViewPage from "../pages/view";
+import React, { lazy, Suspense } from 'react';
 import ProtectedRoute from "./ProtectedRoute";
+
+const PageLoader = () => (
+    <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: '#0a0c10',
+        color: '#de913f',
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '15px',
+        fontWeight: '600'
+    }}>
+        Đang tải trang...
+    </div>
+);
+
+const LazyLoad = (Component) => (
+    <Suspense fallback={<PageLoader />}>
+        <Component />
+    </Suspense>
+);
+
+const Login = lazy(() => import("../pages/auth/Login"));
+const Register = lazy(() => import("../pages/auth/Register"));
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
+const ProjectsPage = lazy(() => import("../pages/projects"));
+const VrScenePage = lazy(() => import("../pages/vrscene"));
+const VrSceneEditPage = lazy(() => import("../pages/vrscene/edit"));
+const PublicViewPage = lazy(() => import("../pages/view"));
+
 
 const router = [
     {
         path: '/',
-        element: <Login />,
+        element: LazyLoad(Login),
     },
     {
         path: '/login',
-        element: <Login />,
+        element: LazyLoad(Login),
     },
     {
         path: '/register',
-        element: <Register />,
+        element: LazyLoad(Register),
     },
     {
         path: '/auth/login',
-        element: <Login />,
+        element: LazyLoad(Login),
     },
     {
         path: '/auth/register',
-        element: <Register />,
+        element: LazyLoad(Register),
     },
     {
         path: '/view/:slug',
-        element: <PublicViewPage />,
+        element: LazyLoad(PublicViewPage),
     },
     {
         path: '/dashboard',
         element: (
             <ProtectedRoute>
-                <Dashboard />
+                {LazyLoad(Dashboard)}
             </ProtectedRoute>
         ),
     },
@@ -53,7 +69,7 @@ const router = [
         path: '/projects',
         element: (
             <ProtectedRoute>
-                <ProjectsPage />
+                {LazyLoad(ProjectsPage)}
             </ProtectedRoute>
         ),
     },
@@ -61,7 +77,7 @@ const router = [
         path: '/vrscene/:idProject',
         element: (
             <ProtectedRoute>
-                <VrScenePage />
+                {LazyLoad(VrScenePage)}
             </ProtectedRoute>
         ),
     },
@@ -69,56 +85,9 @@ const router = [
         path: '/vrscene/edit/:idProject',
         element: (
             <ProtectedRoute>
-                <VrSceneEditPage />
+                {LazyLoad(VrSceneEditPage)}
             </ProtectedRoute>
         ),
-    },
-    {
-        path: '/hiyori',
-        children: [
-            {
-                path: 'can2a',
-                element: <Can2APage />
-            },
-            {
-                path: 'can2b',
-                element: <Can2BPage />
-            },
-            {
-                path: 'can3a',
-                element: <Can3APage />
-            },
-            {
-                path: 'can3b',
-                element: <Can3BPage />
-            }
-        ]
-    },
-    {
-        path: '/mia',
-        children: [
-            {
-                path: 'cana',
-                element: <CanAPage />,
-                index: true
-            },
-            {
-                path: 'canb',
-                element: <CanBPage />
-            },
-            {
-                path: 'canc',
-                element: <CanCPage />
-            },
-            {
-                path: 'cand',
-                element: <CanDPage />
-            },
-            {
-                path: 'cane',
-                element: <CanEPage />
-            }
-        ]
     }
 ];
 

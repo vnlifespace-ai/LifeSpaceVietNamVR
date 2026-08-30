@@ -23,6 +23,10 @@ export default function BottomSceneSelector({ scenes = [], activeScene = null, o
               <img
                 src={imgUrl}
                 alt={s.name}
+                loading="lazy"
+                decoding="async"
+                width="24"
+                height="24"
                 style={{
                   width: '24px',
                   height: '24px',

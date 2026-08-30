@@ -168,6 +168,11 @@ export default function VrSceneTable({
                               src={item.path}
                               alt={item.name || 'VR Scene'}
                               title={`Đường dẫn: ${item.path}`}
+                              loading="lazy"
+                              decoding="async"
+                              fetchPriority="low"
+                              width="72"
+                              height="48"
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.style.display = 'none';

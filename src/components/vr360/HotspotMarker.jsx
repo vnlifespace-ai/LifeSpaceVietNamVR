@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Html } from '@react-three/drei';
-import * as THREE from 'three';
 import styles from './HotspotMarker.module.scss';
 
-export default function HotspotMarker({
+function HotspotMarker({
   nav,
   scenes = [],
   isSelected = false,
@@ -19,13 +18,12 @@ export default function HotspotMarker({
   const rawY = Number(nav.positionY) || 0.1;
   const rawZ = Number(nav.positionZ) || 0.1;
 
-  // Normalize direction vector to unit sphere and scale to 360 panorama inner wall radius (420 units)
-  const vec = new THREE.Vector3(rawX, rawY, rawZ).normalize();
-  const radius = 420;
-
-  const posX = vec.x * radius;
-  const posY = vec.y * radius;
-  const posZ = vec.z * radius;
+  // Calculate 3D sphere normalized position (scaled to 420 units) efficiently without GC overhead
+  const [posX, posY, posZ] = useMemo(() => {
+    const len = Math.hypot(rawX, rawY, rawZ) || 1;
+    const radius = 420;
+    return [(rawX / len) * radius, (rawY / len) * radius, (rawZ / len) * radius];
+  }, [rawX, rawY, rawZ]);
 
   // Handle Right-Click on Hotspot Marker: Instantly switch to target VR Scene!
   const handleRightClickNavigate = (e) => {
@@ -51,7 +49,7 @@ export default function HotspotMarker({
 
   return (
     <group position={[posX, posY, posZ]}>
-      <Html center distanceFactor={420} zIndexRange={[100, 0]}>
+      <Html center zIndexRange={[100, 0]}>
         <div
           className={`${styles.hotspotContainer} ${isSelected ? styles.selectedHotspot : ''}`}
           onClick={handleLeftClickNavigate}
@@ -61,7 +59,7 @@ export default function HotspotMarker({
           <div className={styles.iconWrapper}>
             <div className={styles.hotspotPulse} />
             <div className={styles.hotspotIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="19" x2="12" y2="5" />
                 <polyline points="5 12 12 5 19 12" />
               </svg>
@@ -77,7 +75,7 @@ export default function HotspotMarker({
                 }}
                 title="Xóa Action Navigation"
               >
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -94,3 +92,5 @@ export default function HotspotMarker({
     </group>
   );
 }
+
+export default React.memo(HotspotMarker);

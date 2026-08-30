@@ -16,6 +16,11 @@ function PanoramaMesh({ imageUrl, onSphereClick, isPlacingAction, isReadOnly }) 
       texture.generateMipmaps = false;
       texture.minFilter = THREE.LinearFilter;
     }
+    return () => {
+      if (texture) {
+        texture.dispose();
+      }
+    };
   }, [texture]);
 
   // Handle Right-Click (ContextMenu) to create/place hotspot directly
@@ -57,7 +62,7 @@ function PanoramaMesh({ imageUrl, onSphereClick, isPlacingAction, isReadOnly }) 
       onClick={handleLeftClick}
     >
       <sphereGeometry args={[500, 48, 32]} />
-      <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+      <meshBasicMaterial map={texture} side={THREE.BackSide} />
     </mesh>
   );
 }
@@ -79,9 +84,9 @@ function CameraController({ positionX, positionY, positionZ, controlsRef }) {
   const { camera } = useThree();
 
   useEffect(() => {
-    const posX = Number(positionX) ?? 0.1;
-    const posY = Number(positionY) ?? 0.1;
-    const posZ = Number(positionZ) ?? 0.1;
+    const posX = Number(positionX) || 0.1;
+    const posY = Number(positionY) || 0.1;
+    const posZ = Number(positionZ) || 0.1;
 
     if (camera && controlsRef?.current) {
       camera.position.set(0, 0, 0.0001);
@@ -145,8 +150,8 @@ export default function ThreeCanvasScene({
   return (
     <Canvas
       camera={{ position: [0, 0, 0.0001], fov }}
-      gl={{ powerPreference: 'high-performance', antialias: true }}
-      dpr={[1, 2]}
+      gl={{ powerPreference: 'high-performance', antialias: false, precision: 'mediump' }}
+      dpr={1}
       style={{ width: '100%', height: '100%', cursor: isPlacingAction ? 'crosshair' : 'grab' }}
     >
       <FovController fov={fov} />

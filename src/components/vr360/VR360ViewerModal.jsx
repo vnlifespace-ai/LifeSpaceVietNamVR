@@ -58,11 +58,24 @@ export default function VR360ViewerModal({
 
   // Navigation Actions Hotspots States
   const [navigations, setNavigations] = useState([]);
+  const [loadingNavigations, setLoadingNavigations] = useState(false);
   const [pendingNavigations, setPendingNavigations] = useState([]);
   const [isPlacingAction, setIsPlacingAction] = useState(false);
 
   // Active Hotspot Fine-Tune Selection State
   const [selectedNavToAdjust, setSelectedNavToAdjust] = useState(null);
+
+  // Preload all VR 360 images in background so room switching is instant
+  useEffect(() => {
+    if (scenes && scenes.length > 0) {
+      scenes.forEach((sc) => {
+        if (sc.path && sc.id !== activeScene?.id) {
+          const img = new Image();
+          img.src = sc.path;
+        }
+      });
+    }
+  }, [scenes, activeScene?.id]);
 
   // Fetch Navigation Actions whenever activeScene changes
   useEffect(() => {
@@ -71,12 +84,14 @@ export default function VR360ViewerModal({
     } else {
       setNavigations([]);
       setPendingNavigations([]);
+      setLoadingNavigations(false);
     }
     setIsPlacingAction(false);
     setSelectedNavToAdjust(null);
   }, [activeScene?.id]);
 
   const fetchNavigations = async (sourceSceneId) => {
+    setLoadingNavigations(true);
     try {
       const res = await getNavigationsBySourceScene(sourceSceneId);
       let list = [];
@@ -89,6 +104,8 @@ export default function VR360ViewerModal({
       setPendingNavigations([]);
     } catch (err) {
       console.warn('Fetch navigations error:', err);
+    } finally {
+      setLoadingNavigations(false);
     }
   };
 
@@ -367,6 +384,41 @@ export default function VR360ViewerModal({
             </svg>
           )}
           <span>{toastMsg.text}</span>
+        </div>
+      )}
+
+      {/* Hotspot Loading Indicator Overlay */}
+      {loadingNavigations && (
+        <div style={{
+          position: 'absolute',
+          top: '76px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 45,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          backgroundColor: 'rgba(15, 23, 42, 0.9)',
+          backdropFilter: 'blur(12px)',
+          color: '#ffffff',
+          padding: '8px 18px',
+          borderRadius: '30px',
+          border: '1px solid rgba(222, 145, 63, 0.4)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+          fontSize: '13px',
+          fontWeight: '600',
+          pointerEvents: 'none'
+        }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            border: '2px solid rgba(222, 145, 63, 0.3)',
+            borderTopColor: '#de913f',
+            borderRadius: '50%',
+            animation: 'spin 0.7s linear infinite'
+          }} />
+          <span>Đang tải các điểm Hotspot VR 360°...</span>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 

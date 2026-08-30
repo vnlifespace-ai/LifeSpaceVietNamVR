@@ -22,8 +22,8 @@
 
 .iconWrapper {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,10 +33,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 44px;
-  height: 44px;
-  margin-top: -22px;
-  margin-left: -22px;
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  margin-left: -30px;
   border-radius: 50%;
   background: rgba(222, 145, 63, 0.4);
   border: 2px solid $primary;
@@ -45,8 +45,8 @@
 }
 
 .hotspotIcon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, $primary, $primary-hover);
   color: #ffffff;
@@ -54,50 +54,50 @@
   align-items: center;
   justify-content: center;
   border: 2px solid #ffffff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.45);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
 
   &:hover {
-    transform: scale(1.15);
+    transform: scale(1.16);
     background: linear-gradient(135deg, #f59e0b, #d97706);
-    box-shadow: 0 8px 25px rgba(222, 145, 63, 0.8);
+    box-shadow: 0 7px 22px rgba(222, 145, 63, 0.8);
   }
 }
 
 .hotspotTooltip {
-  margin-top: 6px;
+  margin-top: 5px;
   background: rgba(15, 23, 42, 0.92);
   color: #ffffff;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   z-index: 2;
   transition: all 0.2s ease;
 
   .targetBadge {
     background: rgba(222, 145, 63, 0.25);
     color: $primary;
-    padding: 2px 6px;
+    padding: 1.5px 5px;
     border-radius: 4px;
-    font-size: 10px;
+    font-size: 9.5px;
   }
 }
 
 .hotspotDeleteBtn {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 18px;
-  height: 18px;
+  top: -3px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ef4444;
   color: #ffffff;
@@ -108,7 +108,7 @@
   cursor: pointer;
   z-index: 5;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 
   &:hover {
     transform: scale(1.2);

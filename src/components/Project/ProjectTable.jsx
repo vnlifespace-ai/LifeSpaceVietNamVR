@@ -12,6 +12,17 @@ export default function ProjectTable({
 }) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [copiedSlug, setCopiedSlug] = useState(null);
+
+  const handleCopyLink = (slug) => {
+    if (!slug) return;
+    const publicUrl = `${window.location.origin}/view/${slug}`;
+    navigator.clipboard.writeText(publicUrl);
+    setCopiedSlug(slug);
+    setTimeout(() => {
+      setCopiedSlug(null);
+    }, 2200);
+  };
 
   const filteredProjects = projects.filter((p) => {
     const q = searchQuery.toLowerCase();
@@ -155,9 +166,51 @@ export default function ProjectTable({
                       </div>
                     </td>
                     <td>
-                      <span className={styles.slugTag}>
-                        {item.slug || item.nameProject?.toLowerCase().replace(/\s+/g, '-')}
-                      </span>
+                      <div className={styles.slugCell}>
+                        <span className={styles.slugTag}>
+                          {item.slug || item.nameProject?.toLowerCase().replace(/\s+/g, '-')}
+                        </span>
+
+                        <div className={styles.slugActions}>
+                          <a
+                            href={`/view/${item.slug || item.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.viewLinkBtn}
+                            title="Mở trải nghiệm VR 360 công khai trong tab mới"
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                              <polyline points="15 3 21 3 21 9" />
+                              <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                            <span>View</span>
+                          </a>
+
+                          <button
+                            className={`${styles.copyLinkBtn} ${copiedSlug === (item.slug || item.id) ? styles.copied : ''}`}
+                            onClick={() => handleCopyLink(item.slug || item.id)}
+                            title="Sao chép đường dẫn View VR công khai"
+                          >
+                            {copiedSlug === (item.slug || item.id) ? (
+                              <>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                <span>Đã chép!</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
