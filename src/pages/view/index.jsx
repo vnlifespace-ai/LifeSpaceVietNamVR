@@ -34,24 +34,36 @@ export default function ViewVRScenePage() {
       const projRes = await getProjectBySlug(projectSlug);
       const projData = projRes?.result || projRes;
 
-      if (!projData || (!projData.id && !projData.slug)) {
+      if (!projData || (!projData.id && !projData.slug && !projData.projectId)) {
         throw new Error('Dữ liệu dự án không tồn tại hoặc đã bị xóa');
       }
 
       setProject(projData);
-      const projectId = projData.id;
 
-      // 2. Fetch VR Scenes for this project via GET /projects/id/{idProject}/vrscene
-      const scenesRes = await getVRScenesByProjectId(projectId);
-      const sceneList = Array.isArray(scenesRes?.result) ? scenesRes.result : [];
+      // 2. Parse VR Scenes (use scenes array from slug API response if provided, otherwise fetch via API)
+      let sceneList = [];
+      if (Array.isArray(projData.scenes) && projData.scenes.length > 0) {
+        sceneList = projData.scenes;
+      } else {
+        const projectId = projData.projectId || projData.id;
+        if (projectId) {
+          const scenesRes = await getVRScenesByProjectId(projectId);
+          sceneList = Array.isArray(scenesRes?.result) ? scenesRes.result : [];
+        }
+      }
       setScenes(sceneList);
 
-      // 3. Set default active scene (matching project.idVRScene or first available scene)
-      if (sceneList.length > 0) {
-        const defaultScene =
+      // 3. Set default active scene (using initialScene, or matching project.idVRScene, or first available scene)
+      let defaultScene = null;
+      if (projData.initialScene) {
+        const foundInList = sceneList.find((s) => s.id === projData.initialScene.id);
+        defaultScene = foundInList || projData.initialScene;
+      } else if (sceneList.length > 0) {
+        defaultScene =
           sceneList.find((s) => s.id === projData.idVRScene) || sceneList[0];
-        setActiveScene(defaultScene);
       }
+
+      setActiveScene(defaultScene);
     } catch (err) {
       console.error('Error loading public VR scene:', err);
       setErrorMsg(err.message || 'Không thể tải dữ liệu VR 360°. Vui lòng kiểm tra lại đường dẫn!');
@@ -131,7 +143,7 @@ export default function ViewVRScenePage() {
       scenes={scenes}
       activeScene={activeScene}
       loadingScenes={false}
-      projectName={project?.nameProject || 'Dự án VR 360°'}
+      projectName={project?.nameProject || project?.name || 'Dự án VR 360°'}
       onSelectScene={(scene) => setActiveScene(scene)}
     />
   );

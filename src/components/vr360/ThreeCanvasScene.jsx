@@ -79,21 +79,33 @@ function FovController({ fov }) {
   return null;
 }
 
-// Camera Position & Direction Controller based on positionX, positionY, positionZ
-function CameraController({ positionX, positionY, positionZ, controlsRef }) {
+function getCoord(flatVal, objVal, fallback = 0.1) {
+  if (flatVal !== undefined && flatVal !== null && flatVal !== '') {
+    const num = Number(flatVal);
+    if (!isNaN(num)) return num;
+  }
+  if (objVal !== undefined && objVal !== null && objVal !== '') {
+    const num = Number(objVal);
+    if (!isNaN(num)) return num;
+  }
+  return fallback;
+}
+
+// Camera Position & Direction Controller based on position object or positionX, positionY, positionZ
+function CameraController({ position, positionX, positionY, positionZ, controlsRef }) {
   const { camera } = useThree();
 
   useEffect(() => {
-    const posX = Number(positionX) || 0.1;
-    const posY = Number(positionY) || 0.1;
-    const posZ = Number(positionZ) || 0.1;
+    const posX = getCoord(positionX, position?.x, 0.1);
+    const posY = getCoord(positionY, position?.y, 0.1);
+    const posZ = getCoord(positionZ, position?.z, 0.1);
 
     if (camera && controlsRef?.current) {
       camera.position.set(0, 0, 0.0001);
       controlsRef.current.target.set(posX * 100, posY * 100, posZ * 100);
       controlsRef.current.update();
     }
-  }, [positionX, positionY, positionZ, camera, controlsRef]);
+  }, [position, positionX, positionY, positionZ, camera, controlsRef]);
 
   return null;
 }
@@ -156,6 +168,7 @@ export default function ThreeCanvasScene({
     >
       <FovController fov={fov} />
       <CameraController
+        position={activeScene?.position}
         positionX={activeScene?.positionX}
         positionY={activeScene?.positionY}
         positionZ={activeScene?.positionZ}

@@ -1,6 +1,18 @@
 import React from 'react';
 import styles from './ActionAdjusterToolbar.module.scss';
 
+function getCoord(flatVal, objVal, fallback = 0.1) {
+  if (flatVal !== undefined && flatVal !== null && flatVal !== '') {
+    const num = Number(flatVal);
+    if (!isNaN(num)) return num;
+  }
+  if (objVal !== undefined && objVal !== null && objVal !== '') {
+    const num = Number(objVal);
+    if (!isNaN(num)) return num;
+  }
+  return fallback;
+}
+
 export default function ActionAdjusterToolbar({
   nav,
   scenes = [],
@@ -11,9 +23,9 @@ export default function ActionAdjusterToolbar({
 }) {
   if (!nav) return null;
 
-  const posX = parseFloat(Number(nav.positionX ?? 0.1).toFixed(4));
-  const posY = parseFloat(Number(nav.positionY ?? 0.1).toFixed(4));
-  const posZ = parseFloat(Number(nav.positionZ ?? 0.1).toFixed(4));
+  const posX = parseFloat(getCoord(nav.positionX, nav.position?.x, 0.1).toFixed(4));
+  const posY = parseFloat(getCoord(nav.positionY, nav.position?.y, 0.1).toFixed(4));
+  const posZ = parseFloat(getCoord(nav.positionZ, nav.position?.z, 0.1).toFixed(4));
 
   const handleFieldChange = (field, value) => {
     onUpdateNav({
@@ -29,6 +41,7 @@ export default function ActionAdjusterToolbar({
     onUpdateNav({
       ...nav,
       idTargetScene: targetId,
+      targetSceneId: targetId,
       name: newName,
       isPending: true,
     });
@@ -101,7 +114,7 @@ export default function ActionAdjusterToolbar({
             <span>Scene Mục Tiêu *</span>
           </div>
           <select
-            value={nav.idTargetScene || ''}
+            value={nav.targetSceneId || nav.idTargetScene || ''}
             onChange={(e) => handleTargetSceneChange(e.target.value)}
             className={styles.selectInput}
           >

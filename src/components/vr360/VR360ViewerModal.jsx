@@ -14,6 +14,18 @@ import {
   deleteNavigation,
 } from '../../api/navigation';
 
+function getCoord(flatVal, objVal, fallback = 0.1) {
+  if (flatVal !== undefined && flatVal !== null && flatVal !== '') {
+    const num = Number(flatVal);
+    if (!isNaN(num)) return num;
+  }
+  if (objVal !== undefined && objVal !== null && objVal !== '') {
+    const num = Number(objVal);
+    if (!isNaN(num)) return num;
+  }
+  return fallback;
+}
+
 export default function VR360ViewerModal({
   scenes = [],
   activeScene = null,
@@ -33,17 +45,17 @@ export default function VR360ViewerModal({
 
   // Live coordinates ref (avoids React state re-render loop on every mouse move frame)
   const currentCoordsRef = useRef({
-    x: parseFloat(Number(activeScene?.positionX ?? 0.1).toFixed(4)),
-    y: parseFloat(Number(activeScene?.positionY ?? 0.1).toFixed(4)),
-    z: parseFloat(Number(activeScene?.positionZ ?? 0.1).toFixed(4)),
+    x: parseFloat(getCoord(activeScene?.positionX, activeScene?.position?.x, 0.1).toFixed(4)),
+    y: parseFloat(getCoord(activeScene?.positionY, activeScene?.position?.y, 0.1).toFixed(4)),
+    z: parseFloat(getCoord(activeScene?.positionZ, activeScene?.position?.z, 0.1).toFixed(4)),
   });
 
   useEffect(() => {
     if (activeScene) {
       const initCoords = {
-        x: parseFloat(Number(activeScene.positionX ?? 0.1).toFixed(4)),
-        y: parseFloat(Number(activeScene.positionY ?? 0.1).toFixed(4)),
-        z: parseFloat(Number(activeScene.positionZ ?? 0.1).toFixed(4)),
+        x: parseFloat(getCoord(activeScene.positionX, activeScene.position?.x, 0.1).toFixed(4)),
+        y: parseFloat(getCoord(activeScene.positionY, activeScene.position?.y, 0.1).toFixed(4)),
+        z: parseFloat(getCoord(activeScene.positionZ, activeScene.position?.z, 0.1).toFixed(4)),
       };
       currentCoordsRef.current = initCoords;
       if (coordsSpanRef.current) {
@@ -80,7 +92,13 @@ export default function VR360ViewerModal({
   // Fetch Navigation Actions whenever activeScene changes
   useEffect(() => {
     if (activeScene?.id) {
-      fetchNavigations(activeScene.id);
+      if (Array.isArray(activeScene.navigations)) {
+        setNavigations(activeScene.navigations);
+        setPendingNavigations([]);
+        setLoadingNavigations(false);
+      } else {
+        fetchNavigations(activeScene.id);
+      }
     } else {
       setNavigations([]);
       setPendingNavigations([]);
@@ -88,7 +106,7 @@ export default function VR360ViewerModal({
     }
     setIsPlacingAction(false);
     setSelectedNavToAdjust(null);
-  }, [activeScene?.id]);
+  }, [activeScene]);
 
   const fetchNavigations = async (sourceSceneId) => {
     setLoadingNavigations(true);
@@ -370,13 +388,12 @@ export default function VR360ViewerModal({
       {/* Toast Floating Alert Message */}
       {toastMsg.text && (
         <div
-          className={`${styles.toastAlert} ${
-            toastMsg.type === 'error'
+          className={`${styles.toastAlert} ${toastMsg.type === 'error'
               ? styles.toastError
               : toastMsg.type === 'success'
-              ? styles.toastSuccess
-              : styles.toastInfo
-          }`}
+                ? styles.toastSuccess
+                : styles.toastInfo
+            }`}
         >
           {toastMsg.type === 'success' && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">

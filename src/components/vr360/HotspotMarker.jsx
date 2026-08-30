@@ -2,6 +2,18 @@ import React, { useMemo } from 'react';
 import { Html } from '@react-three/drei';
 import styles from './HotspotMarker.module.scss';
 
+function getCoord(flatVal, objVal, fallback = 0.1) {
+  if (flatVal !== undefined && flatVal !== null && flatVal !== '') {
+    const num = Number(flatVal);
+    if (!isNaN(num)) return num;
+  }
+  if (objVal !== undefined && objVal !== null && objVal !== '') {
+    const num = Number(objVal);
+    if (!isNaN(num)) return num;
+  }
+  return fallback;
+}
+
 function HotspotMarker({
   nav,
   scenes = [],
@@ -11,12 +23,13 @@ function HotspotMarker({
   onDeleteNavigation,
   onSelectNavToAdjust,
 }) {
-  const targetScene = scenes.find((s) => s.id === nav.idTargetScene);
+  const targetSceneId = nav.targetSceneId || nav.idTargetScene;
+  const targetScene = scenes.find((s) => s.id === targetSceneId);
   const targetName = targetScene ? targetScene.name : nav.name || 'Target Scene';
-  
-  const rawX = Number(nav.positionX) || 0.1;
-  const rawY = Number(nav.positionY) || 0.1;
-  const rawZ = Number(nav.positionZ) || 0.1;
+
+  const rawX = getCoord(nav.positionX, nav.position?.x, 0.1);
+  const rawY = getCoord(nav.positionY, nav.position?.y, 0.1);
+  const rawZ = getCoord(nav.positionZ, nav.position?.z, 0.1);
 
   // Calculate 3D sphere normalized position (scaled to 420 units) efficiently without GC overhead
   const [posX, posY, posZ] = useMemo(() => {

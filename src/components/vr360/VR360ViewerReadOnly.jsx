@@ -42,12 +42,17 @@ export default function VR360ViewerReadOnly({
   // Fetch Navigation Actions for activeScene
   useEffect(() => {
     if (activeScene?.id) {
-      fetchNavigations(activeScene.id);
+      if (Array.isArray(activeScene.navigations)) {
+        setNavigations(activeScene.navigations);
+        setLoadingNavigations(false);
+      } else {
+        fetchNavigations(activeScene.id);
+      }
     } else {
       setNavigations([]);
       setLoadingNavigations(false);
     }
-  }, [activeScene?.id]);
+  }, [activeScene]);
 
   const fetchNavigations = async (sourceSceneId) => {
     setLoadingNavigations(true);
