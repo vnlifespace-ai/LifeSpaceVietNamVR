@@ -39,29 +39,26 @@ export function isAuthenticated() {
 }
 
 /**
- * Check if current user has owner role (ower = true)
- * Checks: user object, stored auth_user, and JWT payload claims
+ * Check if current user has owner role (owner = true)
  */
 export function isUserOwner(user) {
-  const token = getAuthToken();
-  const decoded = parseJwt(token) || {};
-
   let storedUser = null;
   try {
     const stored = localStorage.getItem('auth_user');
     if (stored) storedUser = JSON.parse(stored);
   } catch {}
 
+  const token = getAuthToken();
+  const decoded = parseJwt(token) || {};
+
   const currentUser = { ...storedUser, ...user };
 
-  // Check both owner (correct spelling) and ower in user object or decoded JWT token
-  if (currentUser?.owner === true) return true;
-  if (decoded?.owner === true) return true;
-
-  const scopeStr = String(decoded?.scope || decoded?.role || decoded?.roles || decoded?.authorities || decoded?.auth || '').toUpperCase();
-  if (scopeStr.includes('OWNER') || scopeStr.includes('ADMIN')) return true;
-
-  return false;
+  return Boolean(
+    currentUser?.owner === true ||
+    currentUser?.ower === true ||
+    decoded?.owner === true ||
+    decoded?.ower === true
+  );
 }
 
 /**
@@ -129,7 +126,6 @@ export async function loginUser({ email, password }) {
       );
     }
 
-    // Handles response structure: { code: 200, result: { token: "", authenticated: true } }
     if (resData && resData.code !== undefined && resData.code >= 400) {
       throw new Error(resData.message || 'Đăng nhập thất bại!');
     }
@@ -149,9 +145,37 @@ export async function loginUser({ email, password }) {
         localStorage.setItem('access_token', 'authenticated');
       }
 
-      const userObj = result.user
+      let userObj = result.user
         ? { ...decoded, ...result.user }
         : { email, ...result, ...decoded };
+
+      // Lấy danh sách users ngay khi đăng nhập để lưu trường owner & thông tin profile vào auth_user
+      try {
+        const usersResponse = await fetch(`${API_BASE_URL}/users`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const usersData = await usersResponse.json().catch(() => null);
+        if (usersData && usersData.result) {
+          const list = Array.isArray(usersData.result) ? usersData.result : [usersData.result];
+          const matched = list.find(
+            (u) => u.email && email && u.email.toLowerCase() === email.toLowerCase()
+          );
+          if (matched) {
+            const isOwnerVal = Boolean(matched.owner !== undefined ? matched.owner : matched.ower);
+            userObj = {
+              ...userObj,
+              ...matched,
+              owner: isOwnerVal,
+            };
+          }
+        }
+      } catch (err) {
+        console.warn('Error fetching user profile during login:', err);
+      }
 
       localStorage.setItem('auth_user', JSON.stringify(userObj));
     } else {

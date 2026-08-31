@@ -61,7 +61,7 @@ export default function Sidebar({ collapsed, activeMenu, user }) {
             <span className={styles.menuLabel}>Quản lý Dự án</span>
           </li>
 
-          {/* Menu Item: Quản lý Người dùng (Chỉ hiển thị khi ower = true) */}
+          {/* Menu Item: Quản lý Người dùng (Chỉ hiển thị khi owner = true) */}
           {isOwner && (
             <li
               className={`${styles.menuItem} ${isUsersActive ? styles.active : ''}`}
