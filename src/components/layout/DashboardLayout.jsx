@@ -21,6 +21,7 @@ export default function DashboardLayout({ children, activeMenu, onSelectMenu, us
           collapsed={sidebarCollapsed}
           activeMenu={activeMenu}
           onSelectMenu={onSelectMenu}
+          user={user}
         />
 
         <main className={styles.mainContainer}>{children}</main>

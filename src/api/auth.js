@@ -101,7 +101,7 @@ export async function loginUser({ email, password }) {
       if (result.user) {
         localStorage.setItem('auth_user', JSON.stringify(result.user));
       } else {
-        localStorage.setItem('auth_user', JSON.stringify({ email }));
+        localStorage.setItem('auth_user', JSON.stringify({ email, ...result }));
       }
     } else {
       throw new Error(resData?.message || 'Xác thực không thành công!');

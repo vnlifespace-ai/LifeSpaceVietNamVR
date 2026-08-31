@@ -30,6 +30,7 @@ const ProjectsPage = lazy(() => import("../pages/projects"));
 const VrScenePage = lazy(() => import("../pages/vrscene"));
 const VrSceneEditPage = lazy(() => import("../pages/vrscene/edit"));
 const PublicViewPage = lazy(() => import("../pages/view"));
+const UsersPage = lazy(() => import("../pages/users"));
 
 
 const router = [
@@ -70,6 +71,14 @@ const router = [
         element: (
             <ProtectedRoute>
                 {LazyLoad(ProjectsPage)}
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/users',
+        element: (
+            <ProtectedRoute>
+                {LazyLoad(UsersPage)}
             </ProtectedRoute>
         ),
     },

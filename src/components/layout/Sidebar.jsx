@@ -2,13 +2,25 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import styles from './Sidebar.module.scss';
 
-export default function Sidebar({ collapsed, activeMenu }) {
+export default function Sidebar({ collapsed, activeMenu, user }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const currentUser = user || (() => {
+    try {
+      const stored = localStorage.getItem('auth_user');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  const isOwner = Boolean(currentUser?.ower);
 
   const currentPath = location.pathname;
   const isDashboardActive = activeMenu === 'dashboard' || currentPath === '/dashboard';
   const isProjectsActive = activeMenu === 'projects' || currentPath === '/projects';
+  const isUsersActive = activeMenu === 'users' || currentPath === '/users';
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
@@ -56,6 +68,30 @@ export default function Sidebar({ collapsed, activeMenu }) {
             </svg>
             <span className={styles.menuLabel}>Quản lý Dự án</span>
           </li>
+
+          {/* Menu Item: Quản lý Người dùng (Chỉ hiển thị khi ower = true) */}
+          {isOwner && (
+            <li
+              className={`${styles.menuItem} ${isUsersActive ? styles.active : ''}`}
+              onClick={() => navigate('/users')}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span className={styles.menuLabel}>Quản lý người dùng</span>
+            </li>
+          )}
         </ul>
       </div>
     </aside>
