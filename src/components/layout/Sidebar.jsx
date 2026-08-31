@@ -1,21 +1,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router';
+import { isUserOwner } from '../../api/auth';
 import styles from './Sidebar.module.scss';
 
 export default function Sidebar({ collapsed, activeMenu, user }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const currentUser = user || (() => {
-    try {
-      const stored = localStorage.getItem('auth_user');
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
-    }
-  })();
-
-  const isOwner = Boolean(currentUser?.ower);
+  const isOwner = isUserOwner(user);
 
   const currentPath = location.pathname;
   const isDashboardActive = activeMenu === 'dashboard' || currentPath === '/dashboard';

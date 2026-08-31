@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import AlertBox from '../common/AlertBox';
-import styles from '../Project/CreateProjectModal.module.scss';
+import styles from './CreateUserModal.module.scss';
 
 export default function CreateUserModal({ isOpen, onClose, onSubmit, creating = false }) {
   const [formData, setFormData] = useState({
@@ -102,53 +102,98 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit, creating = 
       <AlertBox type="error" message={errorMsg} />
 
       <form id="createUserForm" onSubmit={handleSubmit} className={styles.form}>
+        {/* Name Input */}
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="userNameInput">
             Họ và tên <span className={styles.required}>*</span>
           </label>
-          <input
-            id="userNameInput"
-            type="text"
-            name="name"
-            className={styles.input}
-            placeholder="Ví dụ: Nguyễn Văn A"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            autoFocus
-          />
+          <div className={styles.inputWrapper}>
+            <span className={styles.inputIcon}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <input
+              id="userNameInput"
+              type="text"
+              name="name"
+              className={styles.input}
+              placeholder="Ví dụ: Nguyễn Văn A"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              autoFocus
+            />
+          </div>
         </div>
 
+        {/* Email Input */}
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="userEmailInput">
             Địa chỉ Email <span className={styles.required}>*</span>
           </label>
-          <input
-            id="userEmailInput"
-            type="email"
-            name="email"
-            className={styles.input}
-            placeholder="Ví dụ: user@lifespace.vn"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <div className={styles.inputWrapper}>
+            <span className={styles.inputIcon}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </span>
+            <input
+              id="userEmailInput"
+              type="email"
+              name="email"
+              className={styles.input}
+              placeholder="Ví dụ: user@lifespace.vn"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
         </div>
 
+        {/* Password Input */}
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="userPasswordInput">
             Mật khẩu <span className={styles.required}>*</span>
           </label>
-          <input
-            id="userPasswordInput"
-            type="password"
-            name="password"
-            className={styles.input}
-            placeholder="Nhập mật khẩu cho tài khoản mới"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <div className={styles.inputWrapper}>
+            <span className={styles.inputIcon}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </span>
+            <input
+              id="userPasswordInput"
+              type="password"
+              name="password"
+              className={styles.input}
+              placeholder="Nhập mật khẩu cho tài khoản mới"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
         </div>
       </form>
     </Modal>

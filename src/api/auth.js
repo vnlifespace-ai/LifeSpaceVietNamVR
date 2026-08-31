@@ -1,4 +1,28 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL).replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/+$/, '');
+
+/**
+ * Decode JWT token payload
+ * @param {string} token
+ */
+export function parseJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
 /**
  * Get current auth token from localStorage
@@ -12,6 +36,32 @@ export function getAuthToken() {
  */
 export function isAuthenticated() {
   return localStorage.getItem('authenticated') === 'true' || !!getAuthToken();
+}
+
+/**
+ * Check if current user has owner role (ower = true)
+ * Checks: user object, stored auth_user, and JWT payload claims
+ */
+export function isUserOwner(user) {
+  const token = getAuthToken();
+  const decoded = parseJwt(token) || {};
+
+  let storedUser = null;
+  try {
+    const stored = localStorage.getItem('auth_user');
+    if (stored) storedUser = JSON.parse(stored);
+  } catch {}
+
+  const currentUser = { ...storedUser, ...user };
+
+  // Check both owner (correct spelling) and ower in user object or decoded JWT token
+  if (currentUser?.owner === true) return true;
+  if (decoded?.owner === true) return true;
+
+  const scopeStr = String(decoded?.scope || decoded?.role || decoded?.roles || decoded?.authorities || decoded?.auth || '').toUpperCase();
+  if (scopeStr.includes('OWNER') || scopeStr.includes('ADMIN')) return true;
+
+  return false;
 }
 
 /**
@@ -87,6 +137,7 @@ export async function loginUser({ email, password }) {
     const result = resData?.result || {};
     const isAuthenticatedUser = result.authenticated !== undefined ? result.authenticated : true;
     const token = result.token || result.access_token || '';
+    const decoded = parseJwt(token) || {};
 
     if (isAuthenticatedUser) {
       localStorage.setItem('authenticated', 'true');
@@ -98,11 +149,11 @@ export async function loginUser({ email, password }) {
         localStorage.setItem('access_token', 'authenticated');
       }
 
-      if (result.user) {
-        localStorage.setItem('auth_user', JSON.stringify(result.user));
-      } else {
-        localStorage.setItem('auth_user', JSON.stringify({ email, ...result }));
-      }
+      const userObj = result.user
+        ? { ...decoded, ...result.user }
+        : { email, ...result, ...decoded };
+
+      localStorage.setItem('auth_user', JSON.stringify(userObj));
     } else {
       throw new Error(resData?.message || 'Xác thực không thành công!');
     }
@@ -113,4 +164,3 @@ export async function loginUser({ email, password }) {
     throw error;
   }
 }
-
