@@ -7,7 +7,9 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL).replace(/\/+$/, '');
  */
 function getAuthHeaders() {
   const token = getAuthToken();
-  const headers = {};
+  const headers = {
+    'ngrok-skip-browser-warning': 'true',
+  };
   if (token && token !== 'true' && token !== 'authenticated') {
     headers['Authorization'] = `Bearer ${token}`;
   }

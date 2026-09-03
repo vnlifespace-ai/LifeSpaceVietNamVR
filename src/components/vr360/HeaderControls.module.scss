@@ -10,6 +10,13 @@
   justify-content: space-between;
   align-items: center;
   pointer-events: none;
+
+  @media (max-width: 600px) {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    align-items: flex-start;
+  }
 }
 
 .titleBadge {
@@ -25,16 +32,31 @@
   flex-direction: column;
   gap: 4px;
 
+  @media (max-width: 600px) {
+    padding: 5px 10px;
+    border-radius: 10px;
+    gap: 2px;
+  }
+
   .brandRow {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    @media (max-width: 600px) {
+      gap: 6px;
+    }
 
     .brandLogo {
       height: 32px;
       width: auto;
       object-fit: contain;
       border-radius: 6px;
+
+      @media (max-width: 600px) {
+        height: 22px;
+        border-radius: 4px;
+      }
     }
 
     .titleTextGroup {
@@ -49,12 +71,21 @@
       font-weight: 700;
       letter-spacing: 0.8px;
       text-transform: uppercase;
+
+      @media (max-width: 600px) {
+        font-size: 8px;
+        letter-spacing: 0.4px;
+      }
     }
 
     .sceneName {
       font-size: 14px;
       font-weight: 700;
       color: #f8fafc;
+
+      @media (max-width: 600px) {
+        font-size: 11px;
+      }
     }
   }
 
@@ -70,6 +101,10 @@
   align-items: center;
   gap: 8px;
   pointer-events: auto;
+
+  @media (max-width: 600px) {
+    gap: 5px;
+  }
 }
 
 .actionBtn {
@@ -166,6 +201,18 @@
   transition: all 0.2s ease;
   white-space: nowrap;
 
+  @media (max-width: 600px) {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 11px;
+    border-radius: 8px;
+    gap: 4px;
+
+    span {
+      display: none;
+    }
+  }
+
   &:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
@@ -190,6 +237,12 @@
   padding: 0 4px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 
+  @media (max-width: 600px) {
+    height: 30px;
+    border-radius: 8px;
+    padding: 0 2px;
+  }
+
   .toolBtn {
     background: none;
     border: none;
@@ -202,6 +255,12 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+
+    @media (max-width: 600px) {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+    }
 
     &:hover {
       background: rgba(255, 255, 255, 0.12);

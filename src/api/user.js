@@ -14,6 +14,7 @@ export async function getUsers() {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true',
       },
     });
 
@@ -49,6 +50,7 @@ export async function createUser({ name, email, password }) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({ name, email, password }),
     });

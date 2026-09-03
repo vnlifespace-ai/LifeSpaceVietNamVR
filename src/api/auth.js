@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL).replace(/\/+$/, '');
 
 /**
  * Decode JWT token payload
@@ -46,7 +46,7 @@ export function isUserOwner(user) {
   try {
     const stored = localStorage.getItem('auth_user');
     if (stored) storedUser = JSON.parse(stored);
-  } catch {}
+  } catch { }
 
   const token = getAuthToken();
   const decoded = parseJwt(token) || {};
@@ -81,6 +81,7 @@ export async function registerUser({ name, email, password }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({ name, email, password }),
     });
@@ -114,6 +115,7 @@ export async function loginUser({ email, password }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify({ email, password }),
     });

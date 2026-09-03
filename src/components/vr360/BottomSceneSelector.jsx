@@ -6,51 +6,58 @@ export default function BottomSceneSelector({ scenes = [], activeScene = null, o
 
   return (
     <div className={styles.bottomToolbar}>
+      {/* Scene chips wrapped in scrollable row on mobile */}
+      <div className={styles.chipRow}>
+        {scenes.map((s, idx) => {
+          const isSelected = activeScene?.id === s.id;
+          const imgUrl = s.path || '';
 
-      {scenes.map((s, idx) => {
-        const isSelected = activeScene?.id === s.id;
-        const imgUrl = s.path || '';
+          return (
+            <button
+              key={s.id || idx}
+              onClick={() => {
+                if (onSelectScene) onSelectScene(s);
+              }}
+              className={`${styles.sceneChip} ${isSelected ? styles.active : ''}`}
+            >
+              {imgUrl ? (
+                <img
+                  src={imgUrl}
+                  alt={s.name}
+                  loading="lazy"
+                  decoding="async"
+                  width="24"
+                  height="24"
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '6px',
+                    objectFit: 'cover',
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '6px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                  }}
+                />
+              )}
+              <span>{s.name || `Scene ${idx + 1}`}</span>
+            </button>
+          );
+        })}
+      </div>
 
-        return (
-          <button
-            key={s.id || idx}
-            onClick={() => {
-              if (onSelectScene) onSelectScene(s);
-            }}
-            className={`${styles.sceneChip} ${isSelected ? styles.active : ''}`}
-          >
-            {imgUrl ? (
-              <img
-                src={imgUrl}
-                alt={s.name}
-                loading="lazy"
-                decoding="async"
-                width="24"
-                height="24"
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  objectFit: 'cover',
-                }}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                }}
-              />
-            )}
-            <span>{s.name || `Scene ${idx + 1}`}</span>
-          </button>
-        );
-      })}
+      {/* Copyright chỉ hiển thị trên mobile, thay thế copyright badge dưới trái */}
+      <div className={styles.copyrightInline}>
+        Bản quyền phần mềm thuộc LifeSpace Việt Nam
+      </div>
     </div>
   );
 }

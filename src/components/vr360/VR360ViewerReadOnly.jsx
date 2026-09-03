@@ -98,6 +98,7 @@ export default function VR360ViewerReadOnly({
         onToggleAutoRotate={() => setAutoRotate(!autoRotate)}
         onToggleFullscreen={toggleFullscreen}
         onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
       />
 
       {/* Hotspot Loading Indicator Overlay */}
