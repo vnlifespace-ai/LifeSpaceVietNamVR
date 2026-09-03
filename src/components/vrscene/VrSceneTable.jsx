@@ -120,11 +120,11 @@ export default function VrSceneTable({
             <thead>
               <tr>
                 <th className={styles.sttCol}>STT</th>
-                <th>Mã Scene ID</th>
+                <th>Mã ID</th>
                 <th>Hình Ảnh</th>
-                <th>Tên VR Scene (name)</th>
-                <th>Tọa độ (X, Y, Z)</th>
-                <th style={{ textAlign: 'center' }}>Ảnh Ban Đầu (VR360)</th>
+                <th>Tên Scene</th>
+                <th>Tọa độ</th>
+                <th style={{ textAlign: 'center' }}>Ảnh Mặc Định</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>

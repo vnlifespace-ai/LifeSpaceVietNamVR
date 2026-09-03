@@ -85,7 +85,7 @@ export default function ProjectTable({
 
             {onOpenCreateModal && (
               <button
-                className={styles.addBtn}
+                className={`${styles.addBtn} ${styles.hideMobile}`}
                 onClick={onOpenCreateModal}
                 title="Tạo dự án mới"
               >
@@ -111,10 +111,10 @@ export default function ProjectTable({
             <thead>
               <tr>
                 <th className={styles.sttCol}>STT</th>
-                <th>Mã ID</th>
-                <th>Tên Dự Án (nameProject)</th>
-                <th>Slug</th>
-                <th>Thao Tác</th>
+                <th className={styles.hideMobile}>Mã ID</th>
+                <th>Tên Dự Án</th>
+                <th>View 360°</th>
+                <th className={styles.hideMobile}>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
@@ -146,11 +146,19 @@ export default function ProjectTable({
                 filteredProjects.map((item, index) => (
                   <tr key={item.id || index}>
                     <td className={styles.sttCol}>{index + 1}</td>
-                    <td>
+                    <td className={styles.hideMobile}>
                       <span className={styles.idBadge}>{item.id || `proj-${index + 1}`}</span>
                     </td>
                     <td>
-                      <div className={styles.projectName}>
+                      <div
+                        className={styles.projectName}
+                        onClick={() => {
+                          if (onOpenDetail) onOpenDetail(item);
+                          navigate(`/vrscene/${item.id}`, { state: { project: item } });
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        title="Nhấp để xem và quản lý VR Scene"
+                      >
                         <div className={styles.projectIcon}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -167,7 +175,7 @@ export default function ProjectTable({
                     </td>
                     <td>
                       <div className={styles.slugCell}>
-                        <span className={styles.slugTag}>
+                        <span className={`${styles.slugTag} ${styles.hideMobile}`}>
                           {item.slug || item.nameProject?.toLowerCase().replace(/\s+/g, '-')}
                         </span>
 
@@ -188,7 +196,7 @@ export default function ProjectTable({
                           </a>
 
                           <button
-                            className={`${styles.copyLinkBtn} ${copiedSlug === (item.slug || item.id) ? styles.copied : ''}`}
+                            className={`${styles.copyLinkBtn} ${styles.hideMobile} ${copiedSlug === (item.slug || item.id) ? styles.copied : ''}`}
                             onClick={() => handleCopyLink(item.slug || item.id)}
                             title="Sao chép đường dẫn View VR công khai"
                           >
@@ -212,7 +220,7 @@ export default function ProjectTable({
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className={styles.hideMobile}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <button
                           className={styles.detailBtn}

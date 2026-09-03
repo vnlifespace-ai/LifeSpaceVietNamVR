@@ -260,7 +260,7 @@ export default function VrScenePage() {
             <path d="m4 8 16-4" />
             <circle cx="12" cy="14" r="3" />
           </svg>
-          Quản Lý & Chỉnh Sửa VR Scene (Dự án: {projectName})
+          Quản Lý VR Scene: {projectName}
         </h1>
         <p className={dashboardStyles.pageSubtitle}>
           Mã Dự Án (idProject): <span style={{ color: '#de913f', fontWeight: '600' }}>{idProject}</span>

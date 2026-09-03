@@ -14,13 +14,14 @@ $text-muted: #64748b;
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   flex-shrink: 0;
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
   overflow-y: auto;
+  z-index: 90;
 
   &.collapsed {
     width: 72px;
@@ -33,6 +34,34 @@ $text-muted: #64748b;
     .menuItem {
       justify-content: center;
       padding: 0.85rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    height: calc(100vh - 64px);
+    width: 260px !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+
+    &.collapsed {
+      transform: translateX(-100%);
+      box-shadow: none;
+    }
+
+    &:not(.collapsed) {
+      transform: translateX(0);
+
+      .menuLabel,
+      .sectionTitle {
+        display: block !important;
+      }
+
+      .menuItem {
+        justify-content: flex-start !important;
+      }
     }
   }
 

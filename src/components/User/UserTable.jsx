@@ -149,12 +149,12 @@ export default function UserTable({
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th style={{ width: '60px' }}>STT</th>
+                  <th style={{ width: '50px' }}>STT</th>
                   <th>Họ và Tên</th>
                   <th>Email</th>
-                  <th>Chức vụ (Owner)</th>
-                  <th>Xác thực Veriff</th>
-                  <th>Mã ID người dùng</th>
+                  <th>Chức vụ</th>
+                  <th>Xác thực</th>
+                  <th>Mã ID</th>
                 </tr>
               </thead>
               <tbody>

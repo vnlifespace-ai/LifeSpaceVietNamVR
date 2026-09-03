@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { isUserOwner } from '../../api/auth';
 import styles from './Sidebar.module.scss';
 
-export default function Sidebar({ collapsed, activeMenu, user }) {
+export default function Sidebar({ collapsed, activeMenu, user, onCloseMobile }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,6 +14,13 @@ export default function Sidebar({ collapsed, activeMenu, user }) {
   const isProjectsActive = activeMenu === 'projects' || currentPath === '/projects';
   const isUsersActive = activeMenu === 'users' || currentPath === '/users';
 
+  const handleNav = (path) => {
+    navigate(path);
+    if (onCloseMobile && window.innerWidth <= 768) {
+      onCloseMobile();
+    }
+  };
+
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
       <div className={styles.sidebarContent}>
@@ -23,7 +30,7 @@ export default function Sidebar({ collapsed, activeMenu, user }) {
           {/* Menu Item: Trang Chủ */}
           <li
             className={`${styles.menuItem} ${isDashboardActive ? styles.active : ''}`}
-            onClick={() => navigate('/dashboard')}
+            onClick={() => handleNav('/dashboard')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +50,7 @@ export default function Sidebar({ collapsed, activeMenu, user }) {
           {/* Menu Item: Quản lý Dự án */}
           <li
             className={`${styles.menuItem} ${isProjectsActive ? styles.active : ''}`}
-            onClick={() => navigate('/projects')}
+            onClick={() => handleNav('/projects')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +72,7 @@ export default function Sidebar({ collapsed, activeMenu, user }) {
           {isOwner && (
             <li
               className={`${styles.menuItem} ${isUsersActive ? styles.active : ''}`}
-              onClick={() => navigate('/users')}
+              onClick={() => handleNav('/users')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

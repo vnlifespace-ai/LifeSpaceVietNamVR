@@ -38,6 +38,10 @@ $text-muted: #64748b;
   box-shadow: 0 4px 12px rgba(222, 145, 63, 0.35);
   transition: all 0.2s ease;
 
+  @media (max-width: 640px) {
+    display: none !important;
+  }
+
   &:hover {
     background: $primary-hover;
     transform: translateY(-1px);
@@ -264,6 +268,12 @@ $text-muted: #64748b;
   gap: 1rem;
   flex-wrap: wrap;
 
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
   .headerTitle {
     font-size: 1.15rem;
     font-weight: 700;
@@ -272,6 +282,10 @@ $text-muted: #64748b;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+
+    @media (max-width: 640px) {
+      display: none; /* Ẩn tiêu đề trùng lặp trên di động để tiết kiệm không gian */
+    }
 
     svg {
       color: $primary;
@@ -284,6 +298,14 @@ $text-muted: #64748b;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
+
+    @media (max-width: 640px) {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
     .searchInput {
       background: $bg-white;
@@ -295,6 +317,14 @@ $text-muted: #64748b;
       outline: none;
       transition: all 0.2s ease;
       width: 210px;
+
+      @media (max-width: 640px) {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.825rem;
+      }
 
       &:focus {
         border-color: $primary;
@@ -315,6 +345,18 @@ $text-muted: #64748b;
       align-items: center;
       gap: 0.4rem;
       transition: all 0.2s ease;
+      white-space: nowrap;
+
+      @media (max-width: 640px) {
+        padding: 0;
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+
+        span {
+          display: none; /* Chỉ hiển thị icon trên di động */
+        }
+      }
 
       &:hover {
         border-color: $primary;
@@ -327,6 +369,12 @@ $text-muted: #64748b;
         height: 15px;
       }
     }
+  }
+}
+
+.hideMobile {
+  @media (max-width: 640px) {
+    display: none !important;
   }
 }
 
@@ -358,6 +406,11 @@ $text-muted: #64748b;
       letter-spacing: 0.05em;
       white-space: nowrap;
 
+      @media (max-width: 640px) {
+        padding: 0.65rem 0.5rem;
+        font-size: 0.7rem;
+      }
+
       &:last-child {
         text-align: center;
       }
@@ -377,6 +430,11 @@ $text-muted: #64748b;
         padding: 0.95rem 1.25rem;
         color: $text-main;
         vertical-align: middle;
+
+        @media (max-width: 640px) {
+          padding: 0.65rem 0.5rem;
+          font-size: 0.825rem;
+        }
 
         &:last-child {
           text-align: center;
@@ -587,6 +645,10 @@ $text-muted: #64748b;
   justify-content: center;
   padding: 1.5rem;
   animation: fadeIn 0.2s ease;
+
+  @media (max-width: 640px) {
+    padding: 0.75rem;
+  }
 }
 
 .modalCard {
@@ -595,8 +657,10 @@ $text-muted: #64748b;
   border-radius: 16px;
   width: 100%;
   max-width: 520px;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
   animation: scaleUp 0.2s ease;
 
   .modalHeader {
