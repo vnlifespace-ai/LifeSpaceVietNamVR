@@ -16,6 +16,7 @@ export default function VR360ViewerReadOnly({
   loadingScenes = false,
   projectName = 'Dự án VR 360°',
   onSelectScene,
+  onRefresh,
 }) {
   const [autoRotate, setAutoRotate] = useState(false);
   const [fov, setFov] = useState(62);
@@ -99,6 +100,7 @@ export default function VR360ViewerReadOnly({
         onToggleFullscreen={toggleFullscreen}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
+        onRefresh={onRefresh}
       />
 
       {/* Hotspot Loading Indicator Overlay */}

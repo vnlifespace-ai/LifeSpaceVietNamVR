@@ -17,6 +17,7 @@ export default function HeaderControls({
   onToggleFullscreen,
   onZoomIn,
   onZoomOut,
+  onRefresh,
   onClose,
 }) {
   return (
@@ -86,6 +87,23 @@ export default function HeaderControls({
           </svg>
           <span>{autoRotate ? 'Dừng xoay' : 'Tự xoay'}</span>
         </button>
+
+        {isReadOnly && onRefresh && (
+          <button
+            onClick={onRefresh}
+            title="Làm mới dữ liệu VR"
+            aria-label="Làm mới dữ liệu VR"
+            className={styles.refreshBtn}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12a9 9 0 0 0-15.3-6.4L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 15.3 6.4L21 16" />
+              <path d="M21 21v-5h-5" />
+            </svg>
+            <span>Làm mới</span>
+          </button>
+        )}
 
         {/* Control Tools Group (Fullscreen + Zoom In/Out) */}
         <div className={styles.toolsGroup}>

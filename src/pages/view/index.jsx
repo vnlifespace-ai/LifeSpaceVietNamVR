@@ -16,41 +16,72 @@ export default function ViewVRScenePage() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const getCacheKey = (projectSlug) => `vr-project:${projectSlug}`;
+
+  const getCachedProjectData = (projectSlug) => {
+    try {
+      const cachedData = localStorage.getItem(getCacheKey(projectSlug));
+      return cachedData ? JSON.parse(cachedData) : null;
+    } catch (error) {
+      console.warn('Không thể đọc dữ liệu VR từ localStorage:', error);
+      return null;
+    }
+  };
+
+  const cacheProjectData = (projectSlug, data) => {
+    try {
+      localStorage.setItem(getCacheKey(projectSlug), JSON.stringify(data));
+    } catch (error) {
+      console.warn('Không thể lưu dữ liệu VR vào localStorage:', error);
+    }
+  };
+
   useEffect(() => {
     if (activeSlug) {
-      loadProjectData(activeSlug);
+      loadProjectData(activeSlug, false);
     } else {
       setErrorMsg('Không tìm thấy mã slug hoặc ID dự án trong đường dẫn URL!');
       setLoading(false);
     }
   }, [activeSlug]);
 
-  const loadProjectData = async (projectSlug) => {
+  const loadProjectData = async (projectSlug, forceRefresh = false) => {
     setLoading(true);
     setErrorMsg('');
 
     try {
-      // 1. Call GET /projects/slug/{slug} (with fallback GET /projects/id/{slug})
-      const projRes = await getProjectBySlug(projectSlug);
-      const projData = projRes?.result || projRes;
+      let projData;
+      let sceneList;
+      const cachedData = !forceRefresh ? getCachedProjectData(projectSlug) : null;
 
-      if (!projData || (!projData.id && !projData.slug && !projData.projectId)) {
-        throw new Error('Dữ liệu dự án không tồn tại hoặc đã bị xóa');
+      if (cachedData?.project && Array.isArray(cachedData.scenes)) {
+        projData = cachedData.project;
+        sceneList = cachedData.scenes;
+      } else {
+        // Call GET /projects/slug/{slug} (with fallback GET /projects/id/{slug})
+        const projRes = await getProjectBySlug(projectSlug);
+        projData = projRes?.result || projRes;
+
+        if (!projData || (!projData.id && !projData.slug && !projData.projectId)) {
+          throw new Error('Dữ liệu dự án không tồn tại hoặc đã bị xóa');
+        }
+
+        // Use scenes from the project response when available, otherwise fetch them separately.
+        sceneList = [];
+        if (Array.isArray(projData.scenes) && projData.scenes.length > 0) {
+          sceneList = projData.scenes;
+        } else {
+          const projectId = projData.projectId || projData.id;
+          if (projectId) {
+            const scenesRes = await getVRScenesByProjectId(projectId);
+            sceneList = Array.isArray(scenesRes?.result) ? scenesRes.result : [];
+          }
+        }
+
+        cacheProjectData(projectSlug, { project: projData, scenes: sceneList });
       }
 
       setProject(projData);
-
-      // 2. Parse VR Scenes (use scenes array from slug API response if provided, otherwise fetch via API)
-      let sceneList = [];
-      if (Array.isArray(projData.scenes) && projData.scenes.length > 0) {
-        sceneList = projData.scenes;
-      } else {
-        const projectId = projData.projectId || projData.id;
-        if (projectId) {
-          const scenesRes = await getVRScenesByProjectId(projectId);
-          sceneList = Array.isArray(scenesRes?.result) ? scenesRes.result : [];
-        }
-      }
       setScenes(sceneList);
 
       // 3. Set default active scene (using initialScene, or matching project.idVRScene, or first available scene)
@@ -145,6 +176,7 @@ export default function ViewVRScenePage() {
       loadingScenes={false}
       projectName={project?.nameProject || project?.name || 'Dự án VR 360°'}
       onSelectScene={(scene) => setActiveScene(scene)}
+      onRefresh={() => loadProjectData(activeSlug, true)}
     />
   );
 }
