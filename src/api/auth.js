@@ -69,6 +69,7 @@ export function logoutUser() {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('auth_user');
   localStorage.removeItem('authenticated');
+  localStorage.removeItem('selected_organization');
 }
 
 /**
