@@ -1,4 +1,5 @@
 import { getAuthToken } from './auth';
+import { getOrganizationProjects } from './organization';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL).replace(/\/+$/, '');
 
@@ -18,15 +19,23 @@ function getHeaders() {
 }
 
 /**
- * Fetch list of projects (GET /projects)
+ * Fetch list of projects scoped to an organization (via organization.js / OrganizationController),
+ * or all accessible projects for current user (GET /projects via ProjectController).
+ *
+ * @param {string|null} organizationId
  */
-export async function getProjects() {
+export async function getProjects(organizationId = null) {
   try {
+    if (organizationId) {
+      // Delegate directly to organization.js endpoint (GET /organizations/{id}/projects)
+      return await getOrganizationProjects(organizationId);
+    }
+
+    // When no organizationId is passed, fetch all accessible projects for current user (GET /projects)
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: 'GET',
       headers: getHeaders(),
     });
-
     const resData = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -34,7 +43,6 @@ export async function getProjects() {
         resData?.message || `Không thể lấy danh sách dự án (${response.status})`
       );
     }
-
     if (resData && resData.code !== undefined && resData.code >= 400) {
       throw new Error(resData.message || 'Lấy danh sách dự án thất bại');
     }
@@ -47,15 +55,27 @@ export async function getProjects() {
 }
 
 /**
- * Create a new project (POST /projects)
- * @param {Object} data - { nameProject }
+ * Fetch projects by organization ID (via organization.js)
+ * GET /api/organizations/{organizationId}/projects
+ * @param {string} organizationId
  */
-export async function createProject({ nameProject }) {
+export async function getProjectsByOrganization(organizationId) {
+  return getOrganizationProjects(organizationId);
+}
+
+/**
+ * Create a new project (POST /projects)
+ * @param {Object} data - { nameProject, organizationId? }
+ */
+export async function createProject({ nameProject, organizationId }) {
   try {
+    const body = { nameProject };
+    if (organizationId) body.organizationId = organizationId;
+
     const response = await fetch(`${API_BASE_URL}/projects`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ nameProject }),
+      body: JSON.stringify(body),
     });
 
     const resData = await response.json().catch(() => null);

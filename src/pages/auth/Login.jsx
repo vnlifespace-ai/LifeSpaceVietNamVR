@@ -27,9 +27,9 @@ export default function Login() {
         password,
       });
 
-      setSuccessMsg('Đăng nhập thành công! Đang chuyển đến Dashboard...');
+      setSuccessMsg('Đăng nhập thành công! Đang chuyển đến trang chọn tổ chức...');
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/organizations');
       }, 1000);
     } catch (err) {
       console.error('API loginUser Error:', err);

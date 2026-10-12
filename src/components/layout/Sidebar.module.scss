@@ -7,6 +7,7 @@ $sidebar-bg: #ffffff;
 $card-border: #f1f5f9;
 $text-dark: #0f172a;
 $text-muted: #64748b;
+$text-faint: #94a3b8;
 
 .sidebar {
   width: 260px;
@@ -69,7 +70,7 @@ $text-muted: #64748b;
     padding: 1.25rem 0.85rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.1rem;
   }
 
   .sectionTitle {
@@ -133,4 +134,322 @@ $text-muted: #64748b;
       }
     }
   }
+}
+
+// ── Organization Badge ──────────────────────────────────────────────────────
+.orgBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(222, 145, 63, 0.07);
+  border: 1px solid rgba(222, 145, 63, 0.2);
+  border-radius: 12px;
+}
+
+.orgBadgeIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, $primary, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.orgBadgeInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.orgBadgeName {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: $text-dark;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.switchOrgBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: $primary;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $primary-hover;
+    text-decoration: underline;
+  }
+}
+
+.orgBadgeCollapsed {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, $primary, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  margin: 0 auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(222, 145, 63, 0.4);
+  }
+}
+
+// ── Org Section (Projects / Members) ───────────────────────────────────────
+.orgSection {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.75rem;
+}
+
+.orgSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(222, 145, 63, 0.05);
+  }
+}
+
+.orgSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: $primary;
+  }
+}
+
+.memberCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 100px;
+  background: $primary-light;
+  border: 1px solid rgba(222, 145, 63, 0.3);
+  color: $primary;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  color: $text-faint;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.orgSectionBody {
+  padding: 0.35rem 0 0.25rem 0.5rem;
+}
+
+// ── Sub-list (projects) ─────────────────────────────────────────────────────
+.subList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.subItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: $primary-light;
+
+    .subLabel {
+      color: $primary;
+    }
+
+    .subDot {
+      background: $primary;
+    }
+  }
+}
+
+.subDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.subLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+
+// ── Member list ─────────────────────────────────────────────────────────────
+.memberList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(222, 145, 63, 0.05);
+  }
+}
+
+.memberAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: $text-muted;
+  flex-shrink: 0;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.memberName {
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: $text-dark;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memberRole {
+  font-size: 0.675rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+.roleAdmin {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: #7c3aed;
+}
+
+.roleCreated {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #059669;
+}
+
+.roleUser {
+  background: rgba(222, 145, 63, 0.1);
+  border: 1px solid rgba(222, 145, 63, 0.2);
+  color: $primary-hover;
+}
+
+// ── Misc ────────────────────────────────────────────────────────────────────
+.miniLoader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  color: $text-faint;
+  font-size: 0.8rem;
+}
+
+.spinnerXs {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(222, 145, 63, 0.2);
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.emptyNote {
+  font-size: 0.8rem;
+  color: $text-faint;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+  font-style: italic;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

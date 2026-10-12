@@ -3,7 +3,8 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import ProjectTable from '../../components/Project/ProjectTable';
 import CreateProjectModal from '../../components/Project/CreateProjectModal';
 import AlertBox from '../../components/common/AlertBox';
-import { getProjects, createProject, deleteProject } from '../../api/project';
+import { createProject, deleteProject, getProjects } from '../../api/project';
+import { getSelectedOrganization, getOrganizationProjects } from '../../api/organization';
 import styles from '../dashboard/Dashboard.module.scss';
 
 export default function ProjectsPage() {
@@ -17,6 +18,10 @@ export default function ProjectsPage() {
       // Fallback
     }
   }
+
+  // Read selected organization from localStorage
+  const selectedOrg = getSelectedOrganization();
+  const organizationId = selectedOrg?.id || null;
 
   // --- STATE MANAGEMENT ---
   const [projects, setProjects] = useState([]);
@@ -33,7 +38,10 @@ export default function ProjectsPage() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const res = await getProjects();
+      // Lấy danh sách dự án trực tiếp từ endpoint tổ chức trong organization.js
+      const res = organizationId
+        ? await getOrganizationProjects(organizationId)
+        : await getProjects();
       let list = [];
       if (Array.isArray(res?.result)) {
         list = res.result;
@@ -51,7 +59,8 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    // Re-fetch when org changes (though org is read once at mount here)
+  }, [organizationId]);
 
   // Handle Project Creation
   const handleCreateProject = async ({ nameProject }) => {
@@ -60,7 +69,11 @@ export default function ProjectsPage() {
     setSuccessMsg('');
 
     try {
-      const res = await createProject({ nameProject: nameProject.trim() });
+      // Pass organizationId in the request body
+      const res = await createProject({
+        nameProject: nameProject.trim(),
+        organizationId,
+      });
       const newProj = res?.result;
 
       if (newProj) {
@@ -99,6 +112,9 @@ export default function ProjectsPage() {
     }
   };
 
+  // Page title shows org name for context
+  const orgName = selectedOrg?.name ? ` — ${selectedOrg.name}` : '';
+
   return (
     <DashboardLayout user={user} activeMenu="projects">
       {/* Page Header */}
@@ -115,10 +131,12 @@ export default function ProjectsPage() {
             <line x1="3" y1="9" x2="21" y2="9" />
             <line x1="9" y1="21" x2="9" y2="9" />
           </svg>
-          Quản Lý Dự Án
+          Quản Lý Dự Án{orgName}
         </h1>
         <p className={styles.pageSubtitle}>
-          Xem danh sách, quản lý và xem chi tiết thông tin các dự án thực tế ảo.
+          {selectedOrg
+            ? `Danh sách dự án của tổ chức "${selectedOrg.name}".`
+            : 'Xem danh sách, quản lý và xem chi tiết thông tin các dự án thực tế ảo.'}
         </p>
       </div>
 
@@ -145,6 +163,7 @@ export default function ProjectsPage() {
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateProject}
         creating={creating}
+        organizationName={selectedOrg?.name}
       />
     </DashboardLayout>
   );
