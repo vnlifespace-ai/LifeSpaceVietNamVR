@@ -25,7 +25,6 @@ const LazyLoad = (Component) => (
 
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
-const OrganizationSelect = lazy(() => import("../pages/organizations/OrganizationSelect"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const ProjectsPage = lazy(() => import("../pages/projects"));
 const VrScenePage = lazy(() => import("../pages/vrscene"));
@@ -60,17 +59,9 @@ const router = [
         element: LazyLoad(PublicViewPage),
     },
     {
-        path: '/organizations',
-        element: (
-            <ProtectedRoute>
-                {LazyLoad(OrganizationSelect)}
-            </ProtectedRoute>
-        ),
-    },
-    {
         path: '/dashboard',
         element: (
-            <ProtectedRoute requireOrg={true}>
+            <ProtectedRoute>
                 {LazyLoad(Dashboard)}
             </ProtectedRoute>
         ),
@@ -78,7 +69,7 @@ const router = [
     {
         path: '/projects',
         element: (
-            <ProtectedRoute requireOrg={true}>
+            <ProtectedRoute>
                 {LazyLoad(ProjectsPage)}
             </ProtectedRoute>
         ),
@@ -86,7 +77,7 @@ const router = [
     {
         path: '/users',
         element: (
-            <ProtectedRoute requireOrg={true}>
+            <ProtectedRoute>
                 {LazyLoad(UsersPage)}
             </ProtectedRoute>
         ),
@@ -94,7 +85,7 @@ const router = [
     {
         path: '/vrscene/:idProject',
         element: (
-            <ProtectedRoute requireOrg={true}>
+            <ProtectedRoute>
                 {LazyLoad(VrScenePage)}
             </ProtectedRoute>
         ),
@@ -102,7 +93,7 @@ const router = [
     {
         path: '/vrscene/edit/:idProject',
         element: (
-            <ProtectedRoute requireOrg={true}>
+            <ProtectedRoute>
                 {LazyLoad(VrSceneEditPage)}
             </ProtectedRoute>
         ),
