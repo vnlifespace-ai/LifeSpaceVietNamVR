@@ -5,31 +5,6 @@ $text-main: #334155;
 $text-muted: #64748b;
 $border-subtle: #cbd5e1;
 
-.orgContext {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.85rem;
-  background: rgba(222, 145, 63, 0.08);
-  border: 1px solid rgba(222, 145, 63, 0.2);
-  border-radius: 8px;
-  font-size: 0.82rem;
-  color: $text-muted;
-  margin-bottom: 0.25rem;
-
-  svg {
-    width: 14px;
-    height: 14px;
-    color: $primary;
-    flex-shrink: 0;
-  }
-
-  strong {
-    color: $primary;
-    font-weight: 700;
-  }
-}
-
 .createForm {
   display: flex;
   flex-direction: column;
